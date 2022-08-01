@@ -1,0 +1,4 @@
+remoteuser="username"
+remotehost="your.remote.host"
+remoteport="22"
+remotepath="/path/to/www/files/"
