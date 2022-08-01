@@ -29,7 +29,7 @@ The script will ```scp``` the output image file to the location specified if set
 ### Configure your local customisations
 You can edit the files in ```customfiles/*``` to make flavour changes for `depenguin-me`. 
 
-### Configure variables in build scriot
+### Configure variables in build script
 You can set various parameters in the build script, such as output filename and source files.
 
 ### Run the build script
