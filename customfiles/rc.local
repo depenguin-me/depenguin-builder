@@ -1,0 +1,81 @@
+# depenguin.me modifications to rc.local.sample
+
+# Remove root password
+/usr/sbin/pw usermod root -h -
+
+# create mfsbsd user
+pw groupadd mfsbsd
+pw useradd -m -n mfsbsd -g mfsbsd -G wheel -h - -c "mfsbsd user"
+
+# Install bash, sudo, jq, jo, curl
+pkg install -qy bash sudo jq jo curl
+
+# update sudo access
+cat > /usr/local/etc/sudoers.d/wheel<<EOF
+%wheel ALL=(ALL) NOPASSWD: ALL
+EOF
+
+# mount cd0 (cd1 is mfsbsd install), we'll try both in case file we want doesn't exist
+mount_cd9660 /dev/cd0 /mnt
+
+# Copy the ssh public key into ~/mfsbsd/.ssh/authorized_keys:
+if [ -f /mnt/mfsbsd_authorized_keys ]; then
+    mkdir -p /home/mfsbsd/.ssh
+    cp -f /mnt/mfsbsd_authorized_keys /home/mfsbsd/.ssh/authorized_keys
+    chown -R mfsbsd:mfsbsd /home/mfsbsd/.ssh
+    chmod 644 /home/mfsbsd/.ssh/authorized_keys
+    chmod 750 /home/mfsbsd/.ssh
+    umount /mnt
+else
+    umount /mnt
+    sleep 5
+    mount_cd9660 /dev/cd1 /mnt
+    if [ -f /mnt/mfsbsd_authorized_keys ]; then
+        mkdir -p /home/mfsbsd/.ssh
+        cp -f /mnt/mfsbsd_authorized_keys /home/mfsbsd/.ssh/authorized_keys
+        chown -R mfsbsd:mfsbsd /home/mfsbsd/.ssh
+        chmod 644 /home/mfsbsd/.ssh/authorized_keys
+        chmod 750 /home/mfsbsd/.ssh
+        umount /mnt
+    else
+        umount /mnt
+    fi
+fi
+
+# Configure SSH server
+sed -i '' -e 's/^#Compression delayed/Compression no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^PasswordAuthentication yes/PasswordAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#UsePAM yes/UsePAM no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#VersionAddendum .*$/VersionAddendum none/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#X11Forwarding yes/X11Forwarding no/' \
+    /etc/ssh/sshd_config
+
+# restart ssh
+rm -r /etc/ssh/ssh_host_* || true
+/usr/bin/ssh-keygen -A
+service sshd restart || true
+
+# Change umask
+sed -i '' -e 's/:umask=022:/:umask=027:/g' /etc/login.conf
+
+# Remove toor user
+pw userdel toor
+
+# Secure ttys
+sed -i '' -e 's/ secure/ insecure/g' /etc/ttys
+
+# Secure newsyslog
+sed -i '' -e 's|^/var/log/init.log          644|/var/log/init.log           640|' \
+    /etc/newsyslog.conf
+sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|' \
+    /etc/newsyslog.conf
+sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
+    /etc/newsyslog.conf
