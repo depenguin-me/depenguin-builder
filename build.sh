@@ -4,6 +4,7 @@
 # 2022-07-29: adding script to try automate builds, adapt for custom components
 # 2022-07-31: adding extra rc.local, setting rc build script
 # 2022-08-01: improvements for passwordless root, git version build script, accessip not in use
+# 2022-08-02: switch to using git submodule for mfsbsd, drop git clone step for that repo
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -12,8 +13,8 @@ if [ "$EUID" -ne 0 ]; then
 fi
 
 # we must be on freebsd
-whatosami="$(uname)"
-if [ "${whatosami}" != "FreeBSD" ]; then
+what_os_am_i="$(uname)"
+if [ "${what_os_am_i}" != "FreeBSD" ]; then
     echo "Please run on FreeBSD only"
     exit
 fi
@@ -56,13 +57,11 @@ CDMOUNT="cd-rom"
 CHECKMOUNTCD1=$(mount | grep cd-rom | awk -F" " '{print $1}')
 FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.1/FreeBSD-13.1-RELEASE-amd64-dvd1.iso"
 FREEBSDISOFILE="FreeBSD-13.1-RELEASE-amd64-dvd1.iso"
-MFSBSDSRC="https://github.com/mmatuska/mfsbsd.git"
-MFSBSDDIR="mfsbsd-master"
-MFSBSDCOMMITLOCK="0da806178042b0d3cd20fb6b2e6e38a338a24b9c"
-OUTIMG="mfsbsd-13.1-RELEASE-amd64.img"
-OUTISO="mfsbsd-13.1-RELEASE-amd64.iso"
+MFSBSDDIR="mfsbsd"
 MYRELEASE="13.1-RELEASE"
 MYARCH="amd64"
+OUTIMG="mfsbsd-${MYRELEASE}-${MYARCH}.img"
+OUTISO="mfsbsd-${MYRELEASE}-${MYARCH}.iso"
 MYBASE="${BASEDIR}/${CDMOUNT}/usr/freebsd-dist"
 MYREMOTECONFIG="${BASEDIR}/settings.cfg"
 MYCUSTOMDIR="${BASEDIR}/customfiles"
@@ -98,27 +97,17 @@ if [ -f "${BASEDIR}/${FREEBSDISOFILE}" ]; then
     mount -t cd9660 /dev/"$(/sbin/mdconfig -f ${FREEBSDISOFILE})" "${BASEDIR}/${CDMOUNT}"
 fi
 
-# remove old mfsbsd sources
-if [ -d "${MFSBSDDIR}" ]; then
-    rm -r "${MFSBSDDIR}"
-fi
-
-# clone the mfsBSD repot
-git clone "${MFSBSDSRC}" "${MFSBSDDIR}"
-
 if [ -d "${MFSBSDDIR}" ]; then
     cd "${MFSBSDDIR}" || exit
 fi
-
-# check out a specific commit
-git checkout "${MFSBSDCOMMITLOCK}"
 
 # clean any prior builds
 make clean
 
 # copy in our custom configs
+custom_auth_key="authorized_keys"
 if [ -n "${AUTHKEYFILE}" ]; then
-   cp -f "${BASEDIR}/${AUTHKEYFILE}" conf/authorized_keys
+   cp -f "${BASEDIR}/${AUTHKEYFILE}" conf/"${custom_auth_key}"
 fi
 
 custom_rc_conf="rc.conf"
@@ -147,7 +136,7 @@ if [ -f "${MYCUSTOMDIR}/${custom_loader_conf}" ]; then
 fi
 
 custom_interfaces_file="interfaces.conf"
-if [ -f "${MYCUSTOMDIR}/${custom_interfaces_files}" ]; then
+if [ -f "${MYCUSTOMDIR}/${custom_interfaces_file}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_interfaces_file}" conf/"${custom_interfaces_file}"
 fi
 
@@ -161,11 +150,12 @@ if [ -f "${MYCUSTOMDIR}/${custom_ttys_file}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_ttys_file}" conf/"${custom_ttys_file}"
 fi
 
-# delete old img
+# delete old img (not in use)
 if [ -f "${OUTIMG}" ]; then
     rm "${OUTIMG}"
 fi
 
+# delere old iso
 if [ -f "${OUTISO}" ]; then
     rm "${OUTISO}"
 fi
