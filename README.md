@@ -8,7 +8,7 @@ Work in progress!
 
 ### Clone this repo
 ```
-git clone https://github.com/depenguin-me/depenguin-builder.git
+git clone --recurse-submodules https://github.com/depenguin-me/depenguin-builder.git
 ```
 
 ### Set your remote host settings
@@ -39,4 +39,3 @@ To build the basic setup and upload to your remote destination:
 ```
 ./build.sh -u 1
 ```
-
