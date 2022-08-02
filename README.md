@@ -37,5 +37,6 @@ When ready run the build script. On first run it will download the FreeBSD-DVD i
 
 To build the basic setup and upload to your remote destination:
 ```
+chmod +x build.sh
 ./build.sh -u 1
 ```
