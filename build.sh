@@ -166,7 +166,7 @@ fi
 # create iso
 make iso BASE="${MYBASE}" RELEASE="${MYRELEASE}" ARCH="${MYARCH}" ROOTPW_HASH="*"
 
-# scp to distrobution site
+# scp to distribution site
 if [ "${UPLOAD}" -ne 0 ]; then
     scp -P "${remoteport}" "${OUTISO}" "${remoteuser}"@"${remotehost}":"${remotepath}"/"${OUTISO}"
 fi
