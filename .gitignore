@@ -3,7 +3,9 @@
 *.img
 settings.cfg
 master.zip
-mfsbsd-master/
 id_rsa.pub
 keys.txt
 run.sh
+cd-rom/*
+tmp/*
+build-rc.sh
