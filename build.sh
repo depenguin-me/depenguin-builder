@@ -66,7 +66,7 @@ MYBASE="${BASEDIR}/${CDMOUNT}/usr/freebsd-dist"
 MYREMOTECONFIG="${BASEDIR}/settings.cfg"
 MYCUSTOMDIR="${BASEDIR}/customfiles"
 
-# make sure we're in /root
+# make sure we're in base directory
 cd "${BASEDIR}" || exit
 
 # check remote settings
@@ -97,6 +97,7 @@ if [ -f "${BASEDIR}/${FREEBSDISOFILE}" ]; then
     mount -t cd9660 /dev/"$(/sbin/mdconfig -f ${FREEBSDISOFILE})" "${BASEDIR}/${CDMOUNT}"
 fi
 
+# check for git submodule dir mfsbsd, change directory into it
 if [ -d "${MFSBSDDIR}" ]; then
     cd "${MFSBSDDIR}" || exit
 fi
@@ -110,11 +111,13 @@ if [ -n "${AUTHKEYFILE}" ]; then
    cp -f "${BASEDIR}/${AUTHKEYFILE}" conf/"${custom_auth_key}"
 fi
 
+# in use by depenguin.me build
 custom_rc_conf="rc.conf"
 if [ -f "${MYCUSTOMDIR}/${custom_rc_conf}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_rc_conf}" conf/"${custom_rc_conf}"
 fi
 
+# in use by depenguin.me build
 custom_rc_local="rc.local"
 if [ -f "${MYCUSTOMDIR}/${custom_rc_local}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_rc_local}" conf/"${custom_rc_local}"
@@ -155,7 +158,7 @@ if [ -f "${OUTIMG}" ]; then
     rm "${OUTIMG}"
 fi
 
-# delere old iso
+# delete old iso (in use, but shouldn't exist unless rebuilding)
 if [ -f "${OUTISO}" ]; then
     rm "${OUTISO}"
 fi
@@ -163,12 +166,12 @@ fi
 # create iso
 make iso BASE="${MYBASE}" RELEASE="${MYRELEASE}" ARCH="${MYARCH}" ROOTPW_HASH="*"
 
-# scp to depenguin.me site
+# scp to distrobution site
 if [ "${UPLOAD}" -ne 0 ]; then
     scp -P "${remoteport}" "${OUTISO}" "${remoteuser}"@"${remotehost}":"${remotepath}"/"${OUTISO}"
 fi
 
-# exit
+# change directory
 cd "${BASEDIR}" || exit
 
 # umount cdrom
@@ -177,4 +180,5 @@ if [ -n "${CHECKMOUNTCD2}" ]; then
     umount "${CHECKMOUNTCD2}"
 fi
 
+# exit script
 exit
