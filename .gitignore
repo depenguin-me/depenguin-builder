@@ -10,3 +10,5 @@ cd-rom/*
 tmp/*
 build-rc.sh
 authorized_keys_in
+mfsbsd/conf/rc.local
+mfsbsd/conf/rc.conf
