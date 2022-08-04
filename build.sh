@@ -32,7 +32,7 @@ usage() {
 	Usage: $(basename "${BASH_SOURCE[0]}") [-hbu] [-k /path/to/authorized_keys] 
 	
 	-h Show help
-        -b Build without uploading
+	-b Build without uploading
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy in SSH keys on image boot!)
 	
