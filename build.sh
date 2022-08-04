@@ -32,6 +32,7 @@ fi
 # get command line flags
 while getopts i:f:u: flag
 do
+    # shellcheck disable=SC2220 # XXX: should this be a to-do, cater for wildcard?
     case "${flag}" in
         i) MYACCESSIP="${OPTARG}";;
         f) AUTHKEYFILE="${OPTARG}";;
@@ -70,6 +71,7 @@ MYCUSTOMDIR="${BASEDIR}/customfiles"
 cd "${BASEDIR}" || exit
 
 # check remote settings
+# shellcheck disable=SC1090 # XXX: to-do? use '. file' format instead of 'source file'?
 if [ -f "${MYREMOTECONFIG}" ]; then
     source "${MYREMOTECONFIG}"
 else
@@ -168,6 +170,7 @@ fi
 make iso BASE="${MYBASE}" RELEASE="${MYRELEASE}" ARCH="${MYARCH}" ROOTPW_HASH="*"
 
 # scp to distribution site
+# shellcheck disable=SC2154 # this relates to above, can ignore?
 if [ "${UPLOAD}" -ne 0 ]; then
     scp -P "${remoteport}" "${OUTISO}" "${remoteuser}"@"${remotehost}":"${remotepath}"/"${OUTISO}"
 fi
