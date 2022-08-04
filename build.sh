@@ -133,6 +133,7 @@ if [ -f "${MYCUSTOMDIR}/${custom_hosts_file}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_hosts_file}" conf/"${custom_hosts_file}"
 fi
 
+# in use by depenguin.me build
 custom_loader_conf="loader.conf"
 if [ -f "${MYCUSTOMDIR}/${custom_loader_conf}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_loader_conf}" conf/"${custom_loader_conf}"
