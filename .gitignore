@@ -2,6 +2,7 @@
 *.iso
 *.img
 settings.cfg
+settings.sh
 master.zip
 id_rsa.pub
 keys.txt
