@@ -10,7 +10,7 @@ git clone --recurse-submodules https://github.com/depenguin-me/depenguin-builder
 ```
 
 ### Set your remote host settings
-Set remote host settings in ```~.ssh/config```, then set remote host and path as follows:
+Set remote host settings in ```~/.ssh/config```, then set remote host and path as follows:
 ```
 cd depenguin-builder
 cp settings.sh.sample settings.sh
