@@ -212,7 +212,7 @@ fi
 cd "${BASEDIR}" || exit
 
 # umount cdrom
-CHECKMOUNTCD2="$(mount | { grep "${CDMOUNT}" || :; } | awk '{print $1}' | :)"
+CHECKMOUNTCD2="$(mount | { grep "${CDMOUNT}" || :; } | awk '{print $1}')"
 if [ -n "${CHECKMOUNTCD2}" ]; then
     umount "${CHECKMOUNTCD2}"
 fi
