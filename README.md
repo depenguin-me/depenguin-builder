@@ -42,7 +42,6 @@ When ready, run `build.sh` with flags.
 
 To build the basic setup and upload to your remote destination:
 
-    chmod +x build.sh
     ./build.sh -u
 
 End
