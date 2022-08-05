@@ -35,7 +35,6 @@ usage() {
 	-h Show help
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy in SSH keys on image boot!)
-	
 	EOF
 }
 
@@ -92,15 +91,15 @@ MYCUSTOMDIR="${BASEDIR}/customfiles"
 cd "${BASEDIR}" || exit
 
 # check remote settings
-# shellcheck source=/dev/null
 if [ -f "${BASEDIR}/settings.sh" ]; then
+    # shellcheck source=/dev/null
     source "${BASEDIR}/settings.sh"
 else
     exit_error "Please copy settings.sh.sample to settings.sh and set parameters"
 fi
 
 if [ -z "${CFG_SSH_REMOTEHOST}" ]; then
-    exit_error "CFG_SSH_REMOTEHOST is unset. Did you create a settings.sh file with host and path?"
+    CFG_SSH_REMOTEHOST=depenguin-me
 fi
 
 # create directory if not existing
