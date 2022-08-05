@@ -94,8 +94,6 @@ cd "${BASEDIR}" || exit
 if [ -f "${BASEDIR}/settings.sh" ]; then
     # shellcheck source=/dev/null
     source "${BASEDIR}/settings.sh"
-else
-    exit_error "Please copy settings.sh.sample to settings.sh and set parameters"
 fi
 
 if [ -z "${CFG_SSH_REMOTEHOST}" ]; then
@@ -119,7 +117,6 @@ if [ ! -f "${BASEDIR}/${FREEBSDISOFILE}" ]; then
 fi
 
 # mount the iso file
-# shellcheck disable=SC2086
 if [ -f "${BASEDIR}/${FREEBSDISOFILE}" ]; then
     mount -t cd9660 /dev/"$(/sbin/mdconfig -f "${FREEBSDISOFILE}")" "${BASEDIR}/${CDMOUNT}"
 fi
