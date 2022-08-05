@@ -1,42 +1,47 @@
 # depenguin-builder
-
 Build tool for custom mfsBSD images
-
-Work in progress!
 
 ## How to use
 
 ### Clone this repo
-```
-git clone --recurse-submodules https://github.com/depenguin-me/depenguin-builder.git
-```
+Clone the report with the submodules command:
+
+    git clone --recurse-submodules \
+    https://github.com/depenguin-me/depenguin-builder.git
 
 ### Set your remote host settings
-Set remote host settings
-```
-cd depenguin-builder
-cp settings.cfg.sample settings.cfg
-```
-and configure your details in `settings.cfg`
-```
-remoteuser="username"
-remotehost="your.remote.host"
-remoteport="22"
-remotepath="/path/to/www/files/"
-```
-The script will ```scp``` the output image file to the location specified if set to do so.
+Set remote host settings in `~/.ssh/config`:
+
+    Host depenguin-me
+      User myuser
+      HostName myactualhost.example.org
+      IdentityFile ~/.ssh/id_rsa
+
+Then set remote host and path in `settings.sh`; this file must be created:
+
+    cd depenguin-builder
+    cat >settings.sh <<EOF
+    CFG_SSH_REMOTEHOST="your.remote.host"
+    CFG_SSH_REMOTEPATH="/path/to/www"
+    EOF
+
+The script will `scp` the output image file to the location specified when
+the `-u` flag is added to `build.sh`.
 
 ### Configure your local customisations
-You can edit the files in ```customfiles/*``` to make flavour changes for `depenguin-me`. 
+Optionally edit the files in `customfiles/*` to make flavour changes for `depenguin-me`. 
 
 ### Configure variables in build script
-You can set various parameters in the build script, such as output filename and source files.
+Optionally configure variables in `build.sh`, such as output filename and
+source files.
 
 ### Run the build script
-When ready run the build script. On first run it will download the FreeBSD-DVD install disk at 4GB!
+When ready, run `build.sh` with flags.
+
+> First-time script is run will download a FreeBSD-DVD install disk at 4GB!
 
 To build the basic setup and upload to your remote destination:
-```
-chmod +x build.sh
-./build.sh -u 1
-```
+
+    ./build.sh -u
+
+End

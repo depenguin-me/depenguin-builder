@@ -1,0 +1,2 @@
+CFG_SSH_REMOTEHOST="your.remote.host"
+CFG_SSH_REMOTEPATH=""
