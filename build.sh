@@ -50,7 +50,7 @@ if [ $# -lt 1 ]; then
 fi
 
 # get command line flags
-while getopts hbuf: flag
+while getopts hbuk: flag
 do
     case "${flag}" in
         h) 
@@ -63,7 +63,7 @@ do
         u) 
            UPLOAD="YES"
            ;;
-        f) 
+        k) 
            AUTHKEYFILE="${OPTARG}"
            ;;
         *) 
@@ -98,7 +98,7 @@ MYCUSTOMDIR="${BASEDIR}/customfiles"
 cd "${BASEDIR}" || exit
 
 # check remote settings
-#shellcheck source=/dev/null
+# shellcheck source=/dev/null
 if [ -f "${BASEDIR}/settings.sh" ]; then
     source "${BASEDIR}/settings.sh"
 else
