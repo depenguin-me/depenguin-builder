@@ -6,6 +6,7 @@
 # 2022-08-01: improvements for passwordless root, git version build script, accessip not in use
 # 2022-08-02: switch to using git submodule for mfsbsd, drop git clone step for that repo
 # 2022-08-04: improvements to script, clearing shellcheck errors
+# 2022-08-05: adjustments based on github feedback
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -29,10 +30,9 @@ exit_error() {
 
 usage() {
     cat <<-EOF
-	Usage: $(basename "${BASH_SOURCE[0]}") [-hbu] [-k /path/to/authorized_keys] 
+	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys] 
 	
 	-h Show help
-	-b Build without uploading
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy in SSH keys on image boot!)
 	
@@ -45,20 +45,14 @@ if [ "${what_os_am_i}" != "FreeBSD" ]; then
     exit_error "Please run on FreeBSD only"
 fi
 
-if [ $# -lt 1 ]; then
-  1>&2 exit_error "$(usage)"
-fi
-
+UPLOAD="NO"
 # get command line flags
-while getopts hbuk: flag
+while getopts huk: flag
 do
     case "${flag}" in
         h) 
            usage
            exit 0
-           ;;
-        b)
-           UPLOAD="NO"
            ;;
         u) 
            UPLOAD="YES"
@@ -103,6 +97,10 @@ if [ -f "${BASEDIR}/settings.sh" ]; then
     source "${BASEDIR}/settings.sh"
 else
     exit_error "Please copy settings.sh.sample to settings.sh and set parameters"
+fi
+
+if [ -z "${CFG_SSH_REMOTEHOST}" ]; then
+    exit_error "CFG_SSH_REMOTEHOST is unset. Did you create a settings.sh file with host and path?"
 fi
 
 # create directory if not existing
@@ -195,17 +193,11 @@ if [ -f "${OUTISO}" ]; then
 fi
 
 # create iso
-if [ -n "${UPLOAD}" ]; then
-    make iso BASE="${MYBASE}" RELEASE="${MYRELEASE}" ARCH="${MYARCH}" ROOTPW_HASH="*"
-else
-    exit_error "UPLOAD is unset"
-fi
+make iso BASE="${MYBASE}" RELEASE="${MYRELEASE}" ARCH="${MYARCH}" ROOTPW_HASH="*"
 
 # scp to distribution site
-if [ "$UPLOAD" = "YES" ] && [ -n "${CFG_SSH_REMOTEHOST}" ]; then
+if [ "$UPLOAD" = "YES" ]; then
     scp "${OUTISO}" "${CFG_SSH_REMOTEHOST}":"${CFG_SSH_REMOTEPATH}"
-else
-    exit_error "CFG_SSH_REMOTEHOST is unset"
 fi
 
 # change directory
