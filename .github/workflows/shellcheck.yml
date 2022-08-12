@@ -12,5 +12,5 @@ jobs:
       uses: ludeeus/action-shellcheck@master
       with:
         scandir: '.'
-        additional_files: 'customfiles/depenguin_settings.sh.sample'
+        additional_files: 'customfiles/sample.depenguin_settings.sh'
         check_together: 'yes'
