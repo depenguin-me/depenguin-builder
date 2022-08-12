@@ -107,4 +107,4 @@ sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|
     /etc/newsyslog.conf
 
 # Reboot
-shutdown -r now
+shutdown -p now
