@@ -189,30 +189,34 @@ fi
 # bsdinstall customisations
 # in use by depenguin.me build
 custom_depenguin_bsdinstall="depenguin_bsdinstall.sh"
-if [ -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" ] && [ -d "${custom_depenguin_installdir}" ]; then
-    cp -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" \
-      "${custom_depenguin_installdir}/${custom_depenguin_bsdinstall}"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_bsdinstall}"
 fi
 
 # in use by depenguin.me build
 custom_depenguin_settings="depenguin_settings.sh.sample"
-if [ -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" ] && [ -d "${custom_depenguin_installdir}" ]; then
-    cp -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" \
-      "${custom_depenguin_installdir}/${custom_depenguin_settings}"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_settings}"
 fi
 
 # in use by depenguin.me build
 custom_depenguin_installerconfig="INSTALLERCONFIG.sample"
-if [ -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" ] && [ -d "${custom_depenguin_installdir}" ]; then
-    cp -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" \
-      "${custom_depenguin_installdir}/${custom_depenguin_installerconfig}"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_installerconfig}"
 fi
 
 # in use by depenguin.me build
 custom_destroy_disks="mfsbsd_clean.sh"
-if [ -f "${MYCUSTOMDIR}/${custom_destroy_disks}" ] && [ -d "${custom_depenguin_installdir}" ]; then
-    cp -f "${MYCUSTOMDIR}/${custom_destroy_disks}" \
-      "${custom_depenguin_installdir}/${custom_destroy_disks}"
+if [ -f "${MYCUSTOMDIR}/${custom_destroy_disks}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_destroy_disks}" \
+       "${custom_depenguin_installdir}/${custom_destroy_disks}"
 fi
 
 # delete old img (not in use)
