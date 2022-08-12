@@ -12,7 +12,7 @@ jobs:
       shell: bash
       uses: ludeeus/action-shellcheck@master
       env:
-        SHELLCHECK_OPTS: -x
+        SHELLCHECK_OPTS: -e SC1091 -e SC2154 -e SC3040
       with:
         scandir: '.'
         additional_files: 'customfiles/sample.depenguin_settings.sh'
