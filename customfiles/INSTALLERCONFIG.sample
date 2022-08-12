@@ -11,7 +11,7 @@ export ZFSBOOT_FORCE_4K_SECTORS="1"
 export ZFSBOOT_SWAP_SIZE="8g"
 export ZFSBOOT_SWAP_MIRROR="1"
 export ZFSBOOT_POOL_CREATE_OPTIONS="-O compress=lz4 -O checksum=fletcher4"
-export nonInteractive="YES"
+export NONINTERACTIVE="YES"
 
 #!/bin/sh
 ASSUME_ALWAYS_YES=yes FETCH_RETRY=5 pkg install sed
