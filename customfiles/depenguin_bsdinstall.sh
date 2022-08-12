@@ -47,11 +47,14 @@ sep=$'\001'
 if [ "$run_installer" -ne 0 ]; then
 	bsdinstall script ./INSTALLERCONFIG.active
 else
-	echo "Warning: run_installer is not enabled in depenguin_settings.sh"
+	echo "INFO: file INSTALLERCONFIG.active created"
+	echo ""
+	echo "WARN: run_installer is not enabled in depenguin_settings.sh"
 	echo ""
 	echo "Run installer manually as follows:"
 	echo ""
 	echo "  bsdinstall script ./INSTALLERCONFIG.active"
 	echo ""
+	echo "Or set run_installer=1 in depenguin_settings.sh"
 	exit 0
 fi
