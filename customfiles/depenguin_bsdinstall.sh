@@ -57,3 +57,5 @@ else
 	echo "Or set run_installer=1 in depenguin_settings.sh"
 	exit 0
 fi
+
+# end
