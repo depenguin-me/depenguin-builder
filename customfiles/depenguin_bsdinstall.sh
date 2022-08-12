@@ -12,6 +12,7 @@ exit_error() {
 # read in variables
 # this is giving shellcheck issues
 if [ -f depenguin_settings.sh ]; then
+	# shellcheck source=sample.depenguin_settings.sh
 	. depenguin_settings.sh
 else
 	exit_error "Copy depenguin_settings.sh.sample to depenguin_settings.sh, edit to your needs, then run depenguin_bsdinstall.sh again"
