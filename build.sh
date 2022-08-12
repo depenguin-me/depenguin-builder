@@ -182,7 +182,7 @@ fi
 # in use by depenguin.me build
 # create customfiles/root directory if not exist
 custom_depenguin_installdir="customfiles/root"
-if [ -d "${custom_depenguin_installdir}" ]; then
+if [ ! -d "${custom_depenguin_installdir}" ]; then
     mkdir -p "${custom_depenguin_installdir}"
 fi
 
