@@ -27,6 +27,7 @@ fi
 sep=$'\001'
 
 # change variables in INSTALLERCONFIG to our settings and save to INSTALLERCONFIG.active
+# shellcheck disable=SC2154
 < INSTALLERCONFIG.sample \
   sed "s${sep}%%hostname%%${sep}$conf_hostname${sep}g" | \
   sed "s${sep}%%interface%%${sep}$conf_interface${sep}g" | \
@@ -44,6 +45,7 @@ sep=$'\001'
   > INSTALLERCONFIG.active
 
 # run installer if enabled or output help text
+# shellcheck disable=SC2154
 if [ "$run_installer" -ne 0 ]; then
 	bsdinstall script ./INSTALLERCONFIG.active
 else
