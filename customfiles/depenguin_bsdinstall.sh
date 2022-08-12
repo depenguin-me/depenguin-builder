@@ -10,6 +10,7 @@ exit_error() {
 }
 
 # read in variables
+# this is giving shellcheck issues
 if [ -f depenguin_settings.sh ]; then
 	. depenguin_settings.sh
 else
