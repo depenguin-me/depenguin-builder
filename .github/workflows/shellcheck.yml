@@ -11,6 +11,8 @@ jobs:
     - name: Run ShellCheck
       shell: bash
       uses: ludeeus/action-shellcheck@master
+      env:
+        SHELLCHECK_OPTS: -x
       with:
         scandir: '.'
         additional_files: 'customfiles/sample.depenguin_settings.sh'
