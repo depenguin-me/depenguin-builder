@@ -11,7 +11,7 @@ exit_error() {
 
 # read in variables
 if [ -f depenguin_settings.sh ]; then
-	# shellcheck source=depenguin_settings.sh.sample
+	# shellcheck disable=SC1091 source-path=SCRIPTDIR source=depenguin_settings.sh.sample
 	. depenguin_settings.sh
 else
 	exit_error "Copy depenguin_settings.sh.sample to depenguin_settings.sh, edit to your needs, then run depenguin_bsdinstall.sh again"
@@ -26,6 +26,7 @@ fi
 # safe(r) separator for sed
 sep=$'\001'
 
+# shellcheck disable=SC1091 disable=SC2154 source-path=SCRIPTDIR source=depenguin_settings.sh.sample
 # change variables in INSTALLERCONFIG to our settings and save to INSTALLERCONFIG.active
 < INSTALLERCONFIG.sample \
   sed "s${sep}%%hostname%%${sep}$conf_hostname${sep}g" | \
@@ -44,6 +45,7 @@ sep=$'\001'
   > INSTALLERCONFIG.active
 
 # run installer if enabled or output help text
+# shellcheck disable=SC1091 disable=SC2154 source-path=SCRIPTDIR source=depenguin_settings.sh.sample
 if [ "$run_installer" -ne 0 ]; then
 	bsdinstall script ./INSTALLERCONFIG.active
 else
