@@ -1,4 +1,3 @@
-#!/usr/bin/env bash
 conf_hostname="your.hostname"
 conf_interface="igb0"
 conf_ipv4=""
