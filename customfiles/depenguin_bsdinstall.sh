@@ -43,6 +43,12 @@ sep=$'\001'
   sed "s${sep}%%disktype%%${sep}$conf_disktype${sep}g" \
   > INSTALLERCONFIG.active
 
+# download source files
+export DISTRIBUTIONS="kernel.txz base.txz"
+export BSDINSTALL_DISTDIR="/tmp"
+export BSDINSTALL_DISTSITE="https://download.freebsd.org/ftp/releases/amd64/13.1-RELEASE/"
+bsdinstall distfetch
+
 # run installer if enabled or output help text
 if [ "$run_installer" -ne 0 ]; then
 	bsdinstall script ./INSTALLERCONFIG.active
