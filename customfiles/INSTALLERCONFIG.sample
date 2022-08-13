@@ -1,4 +1,6 @@
 DISTRIBUTIONS="kernel.txz base.txz"
+BSDINSTALL_DISTSITE="https://download.freebsd.org/ftp/releases/amd64/13.1-RELEASE/"
+BSDINSTALL_DISTDIR="/tmp"
 INTERFACES="%%interface%%"
 RELEASE="13.1"
 GEOM="%%disks%%"
