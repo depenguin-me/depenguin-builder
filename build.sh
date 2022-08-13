@@ -7,6 +7,7 @@
 # 2022-08-02: switch to using git submodule for mfsbsd, drop git clone step for that repo
 # 2022-08-04: improvements to script, clearing shellcheck errors
 # 2022-08-05: adjustments based on github feedback
+# 2022-08-12: bsdinstall customisations
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -176,6 +177,46 @@ fi
 custom_ttys_file="ttys"
 if [ -f "${MYCUSTOMDIR}/${custom_ttys_file}" ]; then
     cp -f "${MYCUSTOMDIR}/${custom_ttys_file}" conf/"${custom_ttys_file}"
+fi
+
+# in use by depenguin.me build
+# create customfiles/root directory if not exist
+custom_depenguin_installdir="customfiles/root"
+if [ ! -d "${custom_depenguin_installdir}" ]; then
+    mkdir -p "${custom_depenguin_installdir}"
+fi
+
+# bsdinstall customisations
+# in use by depenguin.me build
+custom_depenguin_bsdinstall="depenguin_bsdinstall.sh"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_bsdinstall}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_bsdinstall}"
+fi
+
+# in use by depenguin.me build
+custom_depenguin_settings="depenguin_settings.sh.sample"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_settings}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_settings}"
+fi
+
+# in use by depenguin.me build
+custom_depenguin_installerconfig="INSTALLERCONFIG.sample"
+if [ -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_depenguin_installerconfig}" \
+       "${custom_depenguin_installdir}/${custom_depenguin_installerconfig}"
+fi
+
+# in use by depenguin.me build
+custom_destroy_disks="mfsbsd_clean.sh"
+if [ -f "${MYCUSTOMDIR}/${custom_destroy_disks}" ] && \
+   [ -d "${custom_depenguin_installdir}" ]; then
+     cp -f "${MYCUSTOMDIR}/${custom_destroy_disks}" \
+       "${custom_depenguin_installdir}/${custom_destroy_disks}"
 fi
 
 # delete old img (not in use)
