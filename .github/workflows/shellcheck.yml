@@ -11,7 +11,7 @@ jobs:
     - name: Run ShellCheck
       uses: ludeeus/action-shellcheck@master
       env:
-        SHELLCHECK_OPTS: -e SC1091 -e SC2034 -e SC2154 -e SC3040
+        SHELLCHECK_OPTS: -e SC1091 -e SC2034 -e SC2154 -e SC3040 -e SC2148
       with:
         scandir: '.'
         additional_files: 'customfiles/sample.depenguin_settings.sh'
