@@ -125,10 +125,8 @@ if [ -f "$BASEDIR/$FREEBSDISOFILE" ]; then
 	  /sbin/mdconfig -f "$FREEBSDISOFILE")" "$BASEDIR/$CDMOUNT"
 fi
 
-# check for git submodule dir mfsbsd, change directory into it
-if [ -d "$MFSBSDDIR" ]; then
-	cd "$MFSBSDDIR" || exit
-fi
+# change directory into mfabad submodule
+cd "$MFSBSDDIR"
 
 # clean any prior builds
 make clean
