@@ -73,8 +73,10 @@ shift "$((OPTIND-1))"
 BASEDIR="$PWD"
 CDMOUNT="cd-rom"
 CHECKMOUNTCD1="$(mount | { grep "$CDMOUNT" || :; } | awk '{print $1}')"
-FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.1/FreeBSD-13.1-RELEASE-amd64-dvd1.iso"
-FREEBSDISOFILE="FreeBSD-13.1-RELEASE-amd64-dvd1.iso"
+FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.1/FreeBSD-13.1-RELEASE-amd64-disc1.iso.xz"
+FREEBSDISOFILE="FreeBSD-13.1-RELEASE-amd64-disc1.iso"
+# See https://www.freebsd.org/releases/13.1R/checksums/CHECKSUM.SHA256-FreeBSD-13.1-RELEASE-amd64.asc
+FREEBSDISOSHA256="697d81653fa246b921ddfcf1d15562c55249cc727b11fa3e47f470e2cf2b6a40"
 MFSBSDDIR="mfsbsd"
 MYRELEASE="13.1-RELEASE"
 MYARCH="amd64"
@@ -109,7 +111,12 @@ fi
 
 # fetch the iso
 if [ ! -f "$BASEDIR/$FREEBSDISOFILE" ]; then
-	fetch "$FREEBSDISOSRC" -o "$BASEDIR/$FREEBSDISOFILE"
+	fetch -o - "$FREEBSDISOSRC" | unxz -T0 > "$BASEDIR/$FREEBSDISOFILE"
+fi
+
+# check iso checksum
+if [ "$(sha256 -q "$BASEDIR/$FREEBSDISOFILE")" != "$FREEBSDISOSHA256" ]; then
+	exit_error "Release checksum mismatch"
 fi
 
 # mount the iso file
