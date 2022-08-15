@@ -38,7 +38,7 @@ source files.
 ### Run the build script
 When ready, run `build.sh` with flags.
 
-> First-time script is run will download a FreeBSD-DVD install disk at 4GB!
+> First-time script is run will download a FreeBSD install cd at 750MiB!
 
 To build the basic setup and upload to your remote destination:
 
