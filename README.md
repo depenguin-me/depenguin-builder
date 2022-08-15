@@ -44,4 +44,4 @@ To build the basic setup and upload to your remote destination:
 
     ./build.sh -u
 
-End
+End of File
