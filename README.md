@@ -34,7 +34,7 @@ Optionally edit the files in `customfiles/*` to make flavour changes for `depeng
 ### Configure custom packages
 You can edit the file `customfiles/depenguin_packages.txt` if you have additional packages to include. 
 
-Beware file size of resulting image is a potential concern, see MFSBSD documentation.
+Beware file size of resulting image is a potential concern, see mfsBSD documentation.
 
 ### Configure variables in build script
 Optionally configure variables in `build.sh`, such as output filename and
