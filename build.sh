@@ -170,6 +170,7 @@ custom_bsdinstall_files=(
 	depenguin_settings.sh.sample  # in use by dependguin.me build
 	INSTALLERCONFIG.sample        # in use by dependguin.me build
 	mfsbsd_clean.sh               # in use by dependguin.me build
+	enable_ipv6.sh                # in use by dependguin.me build
 )
 
 for bsdinstall_file in "${custom_bsdinstall_files[@]}"; do

@@ -1,6 +1,7 @@
 bash
 cpdup
 curl
+dhcpcd
 dmidecode
 ipmitool
 jq
