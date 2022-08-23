@@ -1,0 +1,14 @@
+bash
+cpdup
+curl
+dmidecode
+ipmitool
+jq
+jo
+joe
+nano
+rsync
+smartmontools
+sudo
+tmux
+utf8proc

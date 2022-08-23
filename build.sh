@@ -9,6 +9,7 @@
 # 2022-08-05: adjustments based on github feedback
 # 2022-08-12: bsdinstall customisations
 # 2022-08-15: some general improvements
+# 2022-08-23: include necessary packages in the mfsbsd image
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -180,6 +181,12 @@ for bsdinstall_file in "${custom_bsdinstall_files[@]}"; do
 	fi
 done
 
+# add a list of packages to bake into the image
+if [ -f "$MYCUSTOMDIR/depenguin_packages.txt" ]; then
+	cp -f "$MYCUSTOMDIR/depenguin_packages.txt" "$BASEDIR/mfsbsd/tools/packages"
+else
+    exit_error "missing packages file"
+fi
 
 # delete old img (not in use)
 rm -f "$OUTIMG"
