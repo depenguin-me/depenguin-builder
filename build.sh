@@ -185,9 +185,9 @@ done
 
 # add a list of packages to bake into the image
 if [ -f "$MYCUSTOMDIR/depenguin_packages.txt" ]; then
-        cp -f "$MYCUSTOMDIR/depenguin_packages.txt" "$BASEDIR/mfsbsd/tools/packages"
+    cp -f "$MYCUSTOMDIR/depenguin_packages.txt" "$BASEDIR/mfsbsd/tools/packages"
 else
-        exit_error "missing packages file"
+    exit_error "missing packages file"
 fi
 
 # delete old img (not in use)
