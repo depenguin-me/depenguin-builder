@@ -14,5 +14,8 @@ authorized_keys_in
 mfsbsd/conf/rc.local
 mfsbsd/conf/rc.conf
 mfsbsd/conf/loader.conf
+mfsbsd/*.gz
+mfsbsd/*.iso
+mfsbsd/*.img
 customfiles/depenguin_settings.sh
 customfiles/INSTALLERCONFIG.active

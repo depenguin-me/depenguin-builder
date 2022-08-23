@@ -7,9 +7,6 @@
 pw groupadd mfsbsd
 pw useradd -m -n mfsbsd -g mfsbsd -G wheel -h - -c "mfsbsd user"
 
-# Install bash, sudo, jq, jo, curl
-pkg install -qy bash sudo jq jo curl
-
 # update sudo access
 cat > /usr/local/etc/sudoers.d/wheel<<EOF
 %wheel ALL=(ALL) NOPASSWD: ALL

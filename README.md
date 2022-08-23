@@ -31,6 +31,11 @@ the `-u` flag is added to `build.sh`.
 ### Configure your local customisations
 Optionally edit the files in `customfiles/*` to make flavour changes for `depenguin-me`. 
 
+### Configure custom packages
+You can edit the file `customfiles/depenguin_packages.txt` if you have additional packages to include. 
+
+Beware file size of resulting image is a potential concern, see mfsBSD documentation.
+
 ### Configure variables in build script
 Optionally configure variables in `build.sh`, such as output filename and
 source files.
