@@ -13,3 +13,5 @@ smartmontools
 sudo
 tmux
 utf8proc
+python39
+py39-ansible
