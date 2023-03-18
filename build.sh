@@ -196,8 +196,9 @@ rm -f "$OUTIMG"
 # delete old iso (in use, but shouldn't exist unless rebuilding)
 rm -f "$OUTISO"
 
-# create iso
-make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*"
+# create iso, set max size manually here
+# todo: make maxsize configurable
+make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*" MFSROOT_MAXSIZE="170m"
 
 # scp to distribution site
 if [ "$UPLOAD" = "YES" ]; then
