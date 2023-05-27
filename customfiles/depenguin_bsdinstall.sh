@@ -46,7 +46,7 @@ sep=$'\001'
 # download source files
 export DISTRIBUTIONS="kernel.txz base.txz"
 export BSDINSTALL_DISTDIR="/tmp"
-export BSDINSTALL_DISTSITE="https://download.freebsd.org/ftp/releases/amd64/13.1-RELEASE/"
+export BSDINSTALL_DISTSITE="https://download.freebsd.org/ftp/releases/amd64/13.2-RELEASE/"
 bsdinstall distfetch
 
 # run installer if enabled or output help text
