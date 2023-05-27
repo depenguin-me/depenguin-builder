@@ -1,6 +1,5 @@
 bash
 cpdup
-ca_root_nss
 curl
 dhcpcd
 dmidecode
