@@ -11,6 +11,7 @@
 # 2022-08-15: some general improvements
 # 2022-08-23: include necessary packages in the mfsbsd image
 #             add enable_ipv6.sh script
+# 2023-05-27: update to FreeBSD-13.2 release
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -75,12 +76,12 @@ shift "$((OPTIND-1))"
 BASEDIR="$PWD"
 CDMOUNT="cd-rom"
 CHECKMOUNTCD1="$(mount | { grep "$CDMOUNT" || :; } | awk '{print $1}')"
-FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.1/FreeBSD-13.1-RELEASE-amd64-disc1.iso.xz"
-FREEBSDISOFILE="FreeBSD-13.1-RELEASE-amd64-disc1.iso"
-# See https://www.freebsd.org/releases/13.1R/checksums/CHECKSUM.SHA256-FreeBSD-13.1-RELEASE-amd64.asc
-FREEBSDISOSHA256="697d81653fa246b921ddfcf1d15562c55249cc727b11fa3e47f470e2cf2b6a40"
+FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
+FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
+# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc
+FREEBSDISOSHA256="52a1420db86802cfab8bafa36eccaa78c8b65b59673cbdf690e4b57f9d80f01f"
 MFSBSDDIR="mfsbsd"
-MYRELEASE="13.1-RELEASE"
+MYRELEASE="13.2-RELEASE"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use

@@ -1,5 +1,6 @@
 bash
 cpdup
+ca_root_nss
 curl
 dhcpcd
 dmidecode
@@ -7,6 +8,7 @@ ipmitool
 jq
 jo
 joe
+mtr
 nano
 rsync
 smartmontools
