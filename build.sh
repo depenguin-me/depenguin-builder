@@ -79,7 +79,7 @@ CHECKMOUNTCD1="$(mount | { grep "$CDMOUNT" || :; } | awk '{print $1}')"
 FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
 FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
 # See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc
-FREEBSDISOSHA256="52a1420db86802cfab8bafa36eccaa78c8b65b59673cbdf690e4b57f9d80f01f"
+FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
 MFSBSDDIR="mfsbsd"
 MYRELEASE="13.2-RELEASE"
 MYARCH="amd64"
