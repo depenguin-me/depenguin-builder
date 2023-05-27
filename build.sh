@@ -12,6 +12,7 @@
 # 2022-08-23: include necessary packages in the mfsbsd image
 #             add enable_ipv6.sh script
 # 2023-05-27: update to FreeBSD-13.2 release
+#             add image size as configurable parameter for MFSROOT_MAXSIZE
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -85,6 +86,7 @@ MYRELEASE="13.2-RELEASE"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
+OUTIMAGESIZE="200m"
 MYBASE="$BASEDIR/$CDMOUNT/usr/freebsd-dist"
 MYCUSTOMDIR="$BASEDIR/customfiles"
 
@@ -198,7 +200,7 @@ rm -f "$OUTIMG"
 rm -f "$OUTISO"
 
 # create iso
-make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*"
+make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*" MFSROOT_MAXSIZE="$OUTIMAGESIZE"
 
 # scp to distribution site
 if [ "$UPLOAD" = "YES" ]; then
