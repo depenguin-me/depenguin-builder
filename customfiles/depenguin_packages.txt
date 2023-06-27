@@ -8,7 +8,7 @@ ipmitool
 jq
 jo
 joe
-mtr
+mtr-nox11
 nano
 rsync
 smartmontools
