@@ -12,7 +12,7 @@ Clone the report with the submodules command:
 ### Set your remote host settings
 Set remote host settings in `~/.ssh/config`:
 
-    Host depenguin-me
+    Host depenguin-me-builder
       User myuser
       HostName myactualhost.example.org
       IdentityFile ~/.ssh/id_rsa
@@ -25,7 +25,7 @@ Then set remote host and path in `settings.sh`; this file must be created:
     CFG_SSH_REMOTEPATH="/path/to/www"
     EOF
 
-The script will `scp` the output image file to the location specified when
+The script will `rsync` the output image file to the location specified when
 the `-u` flag is added to `build.sh`.
 
 ### Configure your local customisations
@@ -47,6 +47,6 @@ When ready, run `build.sh` with flags.
 
 To build the basic setup and upload to your remote destination:
 
-    ./build.sh -u
+    ./build.sh -r [ 13.2 | 14.0 ] -u
 
 End of File

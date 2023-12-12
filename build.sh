@@ -277,7 +277,10 @@ make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*" MFSR
 
 # scp to distribution site
 if [ "$UPLOAD" = "YES" ]; then
-	scp "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"
+	#removed#
+	#scp "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"
+	# new approach to deal with bad uploads, make sure 'user@host' in settings file
+	rsync -P -e ssh "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"/$1
 fi
 
 # change directory
