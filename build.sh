@@ -99,7 +99,7 @@ case $RELEASE in
 		MYVERSION="14.0"
 		;;
 	*)
-		echo "Invalid release specified. Use 13.2 or 14.0."
+		echo "Invalid version specified. Use 13.2 or 14.0."
 		exit_error "$(usage)"
 		;;
 esac
