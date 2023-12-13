@@ -13,7 +13,7 @@
 #             add enable_ipv6.sh script
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
-# 2023-12-13: configure for multiple releases, default 14.0
+# 2023-12-13: configure for multiple releases
 #
 
 # this script must be run as root
