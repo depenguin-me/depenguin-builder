@@ -13,6 +13,8 @@
 #             add enable_ipv6.sh script
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
+# 2023-12-13: configure for multiple releases
+#
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -36,12 +38,14 @@ exit_error() {
 
 usage() {
 	cat <<-EOF
-	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys]
+	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys] version
 
 	-h Show help
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
+
+	version (valid values are 13.2 or 14.0)
 	EOF
 }
 
@@ -51,7 +55,9 @@ if [ "$what_os_am_i" != "FreeBSD" ]; then
 	exit_error "Please run on FreeBSD only"
 fi
 
+# Defaults
 UPLOAD="NO"
+
 # get command line flags
 while getopts huk: flag
 do
@@ -73,16 +79,38 @@ do
 done
 shift "$((OPTIND-1))"
 
+# arg1 needs to be 13.2 or 14.0 currently
+RELEASE="$1"
+
+# Determine the release to use and set specific variables, or provide an error notice
+case $RELEASE in
+	13.2)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
+		FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
+		MYRELEASE="13.2-RELEASE"
+		MYVERSION="13.2"
+		;;
+	14.0)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.0R/checksums/CHECKSUM.SHA256-FreeBSD-14.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="7200214030125877561e70718781b435b703180c12575966ad1c7584a3e60dc6"
+		FREEBSDISOFILE="FreeBSD-14.0-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.0-RELEASE"
+		MYVERSION="14.0"
+		;;
+	*)
+		echo "Invalid version specified. Use 13.2 or 14.0."
+		exit_error "$(usage)"
+		;;
+esac
+
 # General Variables
 BASEDIR="$PWD"
 CDMOUNT="cd-rom"
 CHECKMOUNTCD1="$(mount | { grep "$CDMOUNT" || :; } | awk '{print $1}')"
-FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
-FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
-# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc
-FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
 MFSBSDDIR="mfsbsd"
-MYRELEASE="13.2-RELEASE"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
@@ -93,6 +121,14 @@ MYCUSTOMDIR="$BASEDIR/customfiles"
 # make sure we're in base directory
 cd "$BASEDIR" || exit
 
+# Check for available disk space (at least 10 GB required)
+REQUIRED_SPACE_GB=10
+AVAILABLE_SPACE_GB=$(df -k . | awk 'NR==2 {print int($4/(1024*1024))}')
+
+if [ "$AVAILABLE_SPACE_GB" -lt "$REQUIRED_SPACE_GB" ]; then
+	exit_error "Not enough disk space. At least $REQUIRED_SPACE_GB GB required."
+fi
+
 # check remote settings
 if [ -f "$BASEDIR/settings.sh" ]; then
 	# shellcheck source=customfiles/depenguin_settings.sh.sample
@@ -100,7 +136,7 @@ if [ -f "$BASEDIR/settings.sh" ]; then
 fi
 
 if [ -z "$CFG_SSH_REMOTEHOST" ]; then
-	CFG_SSH_REMOTEHOST=depenguin-me
+	CFG_SSH_REMOTEHOST=depenguin-me-builder
 fi
 
 # create directory if not existing
@@ -143,7 +179,6 @@ else
 	: > conf/authorized_keys
 fi
 
-
 # copy in my custom configs
 my_custom_configs=(
 	boot.config
@@ -168,6 +203,26 @@ done
 # copy in bsdinstall customisations
 custom_depenguin_installdir="customfiles/root"
 mkdir -p "$custom_depenguin_installdir"
+
+# use a bashism for substitution
+VERSION_PREFIX="${MYVERSION//\./_}"
+
+# setup correct files to copy in based on version
+#
+#  When updating for new version, copy 14_0_depenguin_bsdinstall.sh
+#  to 14_1_depenguin_bsdinstall.sh and edit, and same for 14_0_INSTALLERCONFIG.sample
+#
+if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" ]; then
+	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
+	chmod +x "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
+else
+	exit_error "Missing $MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh"
+fi
+if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample" ]; then
+	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample" "$MYCUSTOMDIR/INSTALLERCONFIG.sample"
+else
+	exit_error "Missing $MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample"
+fi
 
 custom_bsdinstall_files=(
 	depenguin_bsdinstall.sh       # in use by dependguin.me build
@@ -204,7 +259,10 @@ make iso BASE="$MYBASE" RELEASE="$MYRELEASE" ARCH="$MYARCH" ROOTPW_HASH="*" MFSR
 
 # scp to distribution site
 if [ "$UPLOAD" = "YES" ]; then
-	scp "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"
+	#removed#
+	#scp "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"
+	# new approach to deal with bad uploads, make sure host is configed in .ssh/config
+	rsync -P -e ssh "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"/"$1"
 fi
 
 # change directory
