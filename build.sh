@@ -39,12 +39,12 @@ exit_error() {
 usage() {
 	cat <<-EOF
 	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys] version
-	
+
 	-h Show help
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
-	
+
 	version (valid values are 13.2 or 14.0)
 	EOF
 }
@@ -57,10 +57,9 @@ fi
 
 # Defaults
 UPLOAD="NO"
-RELEASE="$1"
 
 # get command line flags
-while getopts hu:k: flag
+while getopts huk: flag
 do
 	case "$flag" in
 	h)
@@ -79,6 +78,9 @@ do
 	esac
 done
 shift "$((OPTIND-1))"
+
+# arg1 needs to be 13.2 or 14.0 currently
+RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
 case $RELEASE in
@@ -177,7 +179,6 @@ else
 	: > conf/authorized_keys
 fi
 
-
 # copy in my custom configs
 my_custom_configs=(
 	boot.config
@@ -205,8 +206,7 @@ mkdir -p "$custom_depenguin_installdir"
 
 # use a bashism for substitution
 # shellcheck disable=SC2116
-VERSION_PREFIX=$(echo "${MYVERSION//\./_}")
-export VERSION_PREFIX
+VERSION_PREFIX="${MYVERSION//\./_}"
 
 # setup correct files to copy in based on version
 #
