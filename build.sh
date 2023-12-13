@@ -45,7 +45,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 	
-	version (valid values 13.2, 14.0, default 14.0)
+	version (valid values are 13.2 or 14.0)
 	EOF
 }
 
@@ -79,11 +79,6 @@ do
 	esac
 done
 shift "$((OPTIND-1))"
-
-# if no release set, default to 14.0
-if [ -z "${RELEASE+x}" ]; then
-	RELEASE="14.0"
-fi
 
 # Determine the release to use and set specific variables, or provide an error notice
 case $RELEASE in
