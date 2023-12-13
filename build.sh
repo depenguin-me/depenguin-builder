@@ -211,7 +211,7 @@ export VERSION_PREFIX
 # setup correct files to copy in based on version
 #
 #  When updating for new version, copy 14_0_depenguin_bsdinstall.sh
-#  to 14_0_depenguin_bsdinstall.sh and edit, and same for 14_0_INSTALLERCONFIG.sample
+#  to 14_1_depenguin_bsdinstall.sh and edit, and same for 14_0_INSTALLERCONFIG.sample
 #
 if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" ]; then
 	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
