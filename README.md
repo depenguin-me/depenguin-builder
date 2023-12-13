@@ -47,6 +47,6 @@ When ready, run `build.sh` with flags.
 
 To build the basic setup and upload to your remote destination:
 
-    ./build.sh -r [ 13.2 | 14.0 ] -u
+    ./build.sh -u 14.0
 
 End of File
