@@ -13,7 +13,7 @@
 #             add enable_ipv6.sh script
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
-# 2023-12-12: add -r flag to select release
+# 2023-12-13: configure for multiple releases, default 14.0
 #
 
 # this script must be run as root
@@ -38,21 +38,16 @@ exit_error() {
 
 usage() {
 	cat <<-EOF
-	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys]
+	Usage: $(basename "${BASH_SOURCE[0]}") [-hu] [-k /path/to/authorized_keys] version
 	
 	-h Show help
-	-r Release (valid values are 13.2 or 14.0)
 	-u Build with upload to remote host
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
+	
+	version (valid values 13.2, 14.0, default 14.0)
 	EOF
 }
-
-# Check if no arguments were passed
-if [ $# -eq 0 ]; then
-    usage
-    exit 0
-fi
 
 # we must be on freebsd
 what_os_am_i="$(uname)"
@@ -60,9 +55,12 @@ if [ "$what_os_am_i" != "FreeBSD" ]; then
 	exit_error "Please run on FreeBSD only"
 fi
 
+# Defaults
 UPLOAD="NO"
+RELEASE="$1"
+
 # get command line flags
-while getopts hur:k: flag
+while getopts hu:k: flag
 do
 	case "$flag" in
 	h)
@@ -71,30 +69,6 @@ do
 		;;
 	u)
 		UPLOAD="YES"
-		;;
-	r)
-		case $OPTARG in
-			13.2)
-				FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
-				# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
-				FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
-				FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
-				MYRELEASE="13.2-RELEASE"
-				MYVERSION="13.2"
-				;;
-			14.0)
-				FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
-				# See https://www.freebsd.org/releases/14.0R/checksums/CHECKSUM.SHA256-FreeBSD-14.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
-				FREEBSDISOSHA256="7200214030125877561e70718781b435b703180c12575966ad1c7584a3e60dc6"
-				FREEBSDISOFILE="FreeBSD-14.0-RELEASE-amd64-disc1.iso"
-				MYRELEASE="14.0-RELEASE"
-				MYVERSION="14.0"
-				;;
-			*)
-				echo "Invalid release specified. Use 13.2 or 14.0."
-				exit_error "$(usage)"
-				;;
-		esac
 		;;
 	k)
 		AUTHKEYFILE="$(realpath "$OPTARG")"
@@ -106,20 +80,35 @@ do
 done
 shift "$((OPTIND-1))"
 
+# Determine the release to use and set specific variables, or provide an error notice
+case $RELEASE in
+	13.2)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
+		FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
+		MYRELEASE="13.2-RELEASE"
+		MYVERSION="13.2"
+		;;
+	14.0)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.0R/checksums/CHECKSUM.SHA256-FreeBSD-14.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="7200214030125877561e70718781b435b703180c12575966ad1c7584a3e60dc6"
+		FREEBSDISOFILE="FreeBSD-14.0-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.0-RELEASE"
+		MYVERSION="14.0"
+		;;
+	*)
+		echo "Invalid release specified. Use 13.2 or 14.0."
+		exit_error "$(usage)"
+		;;
+esac
+
 # General Variables
 BASEDIR="$PWD"
 CDMOUNT="cd-rom"
 CHECKMOUNTCD1="$(mount | { grep "$CDMOUNT" || :; } | awk '{print $1}')"
-# removing
-#FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.2/FreeBSD-13.2-RELEASE-amd64-disc1.iso.xz"
-# removing
-#FREEBSDISOFILE="FreeBSD-13.2-RELEASE-amd64-disc1.iso"
-# removing
-# See https://www.freebsd.org/releases/13.2R/checksums/CHECKSUM.SHA256-FreeBSD-13.2-RELEASE-amd64.asc
-#FREEBSDISOSHA256="b76ab084e339ee05f59be81354c8cb7dfadf9518e0548f88017d2759a910f17c"
 MFSBSDDIR="mfsbsd"
-# removing
-#MYRELEASE="13.2-RELEASE"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
@@ -135,8 +124,7 @@ REQUIRED_SPACE_GB=10
 AVAILABLE_SPACE_GB=$(df -k . | awk 'NR==2 {print int($4/(1024*1024))}')
 
 if [ "$AVAILABLE_SPACE_GB" -lt "$REQUIRED_SPACE_GB" ]; then
-	echo "Not enough disk space. At least $REQUIRED_SPACE_GB GB required."
-	exit 1
+	exit_error "Not enough disk space. At least $REQUIRED_SPACE_GB GB required."
 fi
 
 # check remote settings
@@ -146,7 +134,7 @@ if [ -f "$BASEDIR/settings.sh" ]; then
 fi
 
 if [ -z "$CFG_SSH_REMOTEHOST" ]; then
-	CFG_SSH_REMOTEHOST=depenguin-me
+	CFG_SSH_REMOTEHOST=depenguin-me-builder
 fi
 
 # create directory if not existing
@@ -215,31 +203,21 @@ done
 custom_depenguin_installdir="customfiles/root"
 mkdir -p "$custom_depenguin_installdir"
 
+# use a bashism for substitution
+VERSION_PREFIX=$(echo "${MYVERSION//\./_}")
+export VERSION_PREFIX
+
 # setup correct files to copy in based on version
-if [ "$MYVERSION" = "13.2" ]; then
-	if [ -f "$MYCUSTOMDIR/13_2_depenguin_bsdinstall.sh" ]; then
-		cp -f "$MYCUSTOMDIR/13_2_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
-		chmod +x "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
-	else
-		echo "Missing $MYCUSTOMDIR/13_2_depenguin_bsdinstall.sh"
-	fi
-	if [ -f "$MYCUSTOMDIR/13_2_INSTALLERCONFIG.sample" ]; then
-		cp -f "$MYCUSTOMDIR/13_2_INSTALLERCONFIG.sample" "$MYCUSTOMDIR/INSTALLERCONFIG.sample"
-	else
-		echo "Missing $MYCUSTOMDIR/13_2_INSTALLERCONFIG.sample"
-	fi
-elif [ "$MYVERSION" = "14.0" ]; then
-	if [ -f "$MYCUSTOMDIR/14_0_depenguin_bsdinstall.sh" ]; then
-		cp -f "$MYCUSTOMDIR/14_0_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
-		chmod +x "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
-	else
-		echo "Missing $MYCUSTOMDIR/14_0_depenguin_bsdinstall.sh"
-	fi
-	if [ -f "$MYCUSTOMDIR/14_0_INSTALLERCONFIG.sample" ]; then
-		cp -f "$MYCUSTOMDIR/14_0_INSTALLERCONFIG.sample" "$MYCUSTOMDIR/INSTALLERCONFIG.sample"
-	else
-		echo "Missing $MYCUSTOMDIR/14_0_INSTALLERCONFIG.sample"
-	fi
+if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" ]; then
+	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
+	chmod +x "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
+else
+	exit_error "Missing $MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh"
+fi
+if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample" ]; then
+	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample" "$MYCUSTOMDIR/INSTALLERCONFIG.sample"
+else
+	exit_error "Missing $MYCUSTOMDIR/${VERSION_PREFIX}_INSTALLERCONFIG.sample"
 fi
 
 custom_bsdinstall_files=(
