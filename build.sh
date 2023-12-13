@@ -205,7 +205,6 @@ custom_depenguin_installdir="customfiles/root"
 mkdir -p "$custom_depenguin_installdir"
 
 # use a bashism for substitution
-# shellcheck disable=SC2116
 VERSION_PREFIX="${MYVERSION//\./_}"
 
 # setup correct files to copy in based on version
