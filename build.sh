@@ -80,6 +80,11 @@ do
 done
 shift "$((OPTIND-1))"
 
+# if no release set, default to 14.0
+if [ -z "${RELEASE+x}" ]; then
+	RELEASE="14.0"
+fi
+
 # Determine the release to use and set specific variables, or provide an error notice
 case $RELEASE in
 	13.2)
@@ -204,6 +209,7 @@ custom_depenguin_installdir="customfiles/root"
 mkdir -p "$custom_depenguin_installdir"
 
 # use a bashism for substitution
+# shellcheck disable=SC2116
 VERSION_PREFIX=$(echo "${MYVERSION//\./_}")
 export VERSION_PREFIX
 
