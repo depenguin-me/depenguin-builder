@@ -26,7 +26,7 @@ echo 'OPTIONS_UNSET+=X11' >> /etc/make.conf
 
 # Basic network options
 sysrc hostname=%%hostname%%
-sysrc ifconfig_%%interface%%_name="untrusted"
+#sysrc ifconfig_%%interface%%_name="untrusted"
 sysrc ifconfig_untrusted="up"
 sysrc ifconfig_untrusted_ipv6="up"
 sysrc ifconfig_untrusted_aliases="inet %%ipv4%%/32 inet6 %%ipv6%%/64"
@@ -107,6 +107,59 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
     /etc/newsyslog.conf
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
+
+# Setup firstboot magic to determine network interface
+cat >/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
+#!/bin/sh
+
+# KEYWORD: firstboot
+# PROVIDE: firstboot_depenguin
+# REQUIRE: syslogd NETWORKING
+# BEFORE: LOGIN
+
+#
+# Based on firstboot-freebsd-update by cpercival
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf (in the disk
+# image, since this only runs on the first boot) to enable this:
+#
+# firstboot_depenguin_enable="YES"
+#
+
+. /etc/rc.subr
+
+: ${firstboot_depenguin_enable:="NO"}
+
+name="firstboot_depenguin"
+rcvar=firstboot_depenguin_enable
+start_cmd="firstboot_depenguin_run | logger -s -t 'depenguin'"
+stop_cmd=":"
+
+firstboot_depenguin_run()
+{
+	intfs=$(ifconfig -l | tr " " "\n")
+	if echo "$intfs" | grep -q "^untrusted$"; then
+		echo "Found existing interface named untrusted, doing nothing"
+	else
+		echo "No interface named untrusted found, trying to determine"
+		intf=$(echo "$intfs" | grep -Eo "^(em0|igb0|bge0)$" | head -n1)
+		if [ -z "$intf" ]; then
+			echo "No potential uplink interface found"
+		else
+			echo "Found interface $intf, configuring"
+			sysrc "ifconfig_${intf}_name=untrusted"
+			echo "Requesting reboot"
+			touch "${firstboot_sentinel}-reboot"
+		fi
+	fi
+}
+
+load_rc_config $name
+run_rc_command "$1"
+EOF
+chmod 755 /usr/local/etc/rc.d/firstboot_depenguin
+sysrc firstboot_depenguin_enable=YES
+touch /firstboot
 
 # Reboot
 shutdown -p now
