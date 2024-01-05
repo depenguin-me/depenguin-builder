@@ -109,6 +109,7 @@ sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|
     /etc/newsyslog.conf
 
 # Setup firstboot magic to determine network interface
+mkdir -p /usr/local/etc/rc.d
 cat >/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #!/bin/sh
 
