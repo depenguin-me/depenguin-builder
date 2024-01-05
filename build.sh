@@ -262,7 +262,7 @@ if [ "$UPLOAD" = "YES" ]; then
 	#removed#
 	#scp "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"
 	# new approach to deal with bad uploads, make sure host is configed in .ssh/config
-	rsync -P -e ssh "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"/"$1"
+	rsync -P -e ssh "$OUTISO" "$CFG_SSH_REMOTEHOST":"$CFG_SSH_REMOTEPATH"/.
 fi
 
 # change directory
