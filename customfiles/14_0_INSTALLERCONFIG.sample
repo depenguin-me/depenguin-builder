@@ -26,7 +26,7 @@ echo 'OPTIONS_UNSET+=X11' >> /etc/make.conf
 
 # Basic network options
 sysrc hostname=%%hostname%%
-sysrc ifconfig_%%interface%%_name="untrusted"
+#sysrc ifconfig_%%interface%%_name="untrusted"
 sysrc ifconfig_untrusted="up"
 sysrc ifconfig_untrusted_ipv6="up"
 sysrc ifconfig_untrusted_aliases="inet %%ipv4%%/32 inet6 %%ipv6%%/64"
@@ -107,6 +107,92 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
     /etc/newsyslog.conf
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
+
+# Setup firstboot magic to determine network interface
+mkdir -p /usr/local/etc/rc.d
+
+# See https://reviews.freebsd.org/D43350 why we use echo here
+echo '#!/bin/sh' >/usr/local/etc/rc.d/firstboot_depenguin
+cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
+
+# KEYWORD: firstboot
+# PROVIDE: firstboot_depenguin
+# REQUIRE: syslogd NETWORKING
+# BEFORE: LOGIN
+
+#
+# Script to detect the physical uplink interface and rename
+# it to ${firstboot_depenguin_uplink_name} ("untrusted" by default).
+#
+# Detection is based on the list of interfaces to look for and
+# if they are physically connected. In case an interface is
+# found and configured, the server is rebooted.
+#
+# (firstboot logic from firstboot-freebsd-update by cpercival)
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf (in the disk
+# image, since this only runs on the first boot) to enable this:
+#
+# firstboot_depenguin_enable="YES"
+#
+# Options:
+#
+# firstboot_depenguin_uplink_name: Name of the uplink interface
+#                                  Set to "untrusted" by default
+# firstboot_depenguin_interfaces:  List of physical interfaces to check for
+#                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
+#                                  bge1 ixl0 ixl1" by default
+# firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
+#                                  Set to "10" by default
+#
+
+. /etc/rc.subr
+
+: ${firstboot_depenguin_enable:="NO"}
+: ${firstboot_depenguin_uplink_name:="untrusted"}
+: ${firstboot_depenguin_interfaces:="vtnet0 \
+    em0 em1 igb0 igb1 bge0 bge1 ixl0 ixl1"}
+: ${firstboot_depenguin_sleep_secs:="10"}
+
+name="firstboot_depenguin"
+rcvar=firstboot_depenguin_enable
+start_cmd="firstboot_depenguin_run | logger -s -t 'depenguin'"
+stop_cmd=":"
+
+firstboot_depenguin_run()
+{
+	local uplink="$firstboot_depenguin_uplink_name"
+	local sleep_secs="$firstboot_depenguin_sleep_secs"
+
+	intfs=$(ifconfig -l | tr " " "\n")
+	if echo "$intfs" | grep -q "^${uplink}$"; then
+		echo "Found existing interface named ${uplink}, doing nothing"
+		return 0
+	fi
+	echo "No interface named ${uplink} found, trying to determine"
+	echo "Sleeping ${sleep_secs} seconds to allow things to settle"
+	sleep "${sleep_secs}"
+	for intf in $firstboot_depenguin_interfaces; do
+		echo "$intfs" | grep -Eq "^${intf}$" || continue
+		if ifconfig "$intf" | grep -q "status: no carrier"; then
+			echo "Interface ${intf} has no carrier"
+			continue
+		fi
+		echo "Found interface ${intf}, configuring"
+		sysrc "ifconfig_${intf}_name=${uplink}"
+		echo "Requesting reboot after fixing network interface"
+		touch "${firstboot_sentinel}-reboot"
+		return 0
+	done
+	echo "No potential uplink interface found"
+}
+
+load_rc_config $name
+run_rc_command "$1"
+EOF
+chmod 755 /usr/local/etc/rc.d/firstboot_depenguin
+sysrc firstboot_depenguin_enable=YES
+touch /firstboot
 
 # Reboot
 shutdown -p now
