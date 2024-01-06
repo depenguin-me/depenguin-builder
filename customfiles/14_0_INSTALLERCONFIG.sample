@@ -110,6 +110,8 @@ sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|
 
 # Setup firstboot magic to determine network interface
 mkdir -p /usr/local/etc/rc.d
+
+# See https://reviews.freebsd.org/D43350 why we use echo here
 echo '#!/bin/sh' >/usr/local/etc/rc.d/firstboot_depenguin
 cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 
@@ -126,10 +128,17 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #
 # firstboot_depenguin_enable="YES"
 #
+# Options:
+#
+# firstboot_depenguin_uplink_name: Set to "untrusted" by default
+# firstboot_depenguin_interfaces: Set to "em0 igb0 bge0" by default
+#
 
 . /etc/rc.subr
 
 : ${firstboot_depenguin_enable:="NO"}
+: ${firstboot_depenguin_uplink_name:="untrusted"}
+: ${firstboot_depenguin_interfaces:="em0 igb0 bge0"}
 
 name="firstboot_depenguin"
 rcvar=firstboot_depenguin_enable
@@ -138,18 +147,23 @@ stop_cmd=":"
 
 firstboot_depenguin_run()
 {
+	local uplink="$firstboot_depenguin_uplink_name"
+
 	intfs=$(ifconfig -l | tr " " "\n")
-	if echo "$intfs" | grep -q "^untrusted$"; then
-		echo "Found existing interface named untrusted, doing nothing"
+	if echo "$intfs" | grep -q "^${uplink}$"; then
+		echo "Found existing interface named ${uplink}, doing nothing"
 	else
-		echo "No interface named untrusted found, trying to determine"
-		intf=$(echo "$intfs" | grep -Eo "^(em0|igb0|bge0)$" | head -n1)
+		echo "No interface named ${uplink} found, trying to determine"
+		for i in $firstboot_depenguin_interfaces; do
+			intf=$(echo "$intfs" | grep -Eo "^${i}$" | head -n1)
+			[ -n "$intf" ] && break
+		done
 		if [ -z "$intf" ]; then
 			echo "No potential uplink interface found"
 		else
-			echo "Found interface $intf, configuring"
-			sysrc "ifconfig_${intf}_name=untrusted"
-			echo "Requesting reboot"
+			echo "Found interface ${intf}, configuring"
+			sysrc "ifconfig_${intf}_name=${uplink}"
+			echo "Requesting reboot after fixing network interface"
 			touch "${firstboot_sentinel}-reboot"
 		fi
 	fi
