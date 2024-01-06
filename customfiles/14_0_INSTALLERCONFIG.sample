@@ -121,7 +121,14 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 # BEFORE: LOGIN
 
 #
-# Based on firstboot-freebsd-update by cpercival
+# Script to detect the physical uplink interface and rename
+# it to ${firstboot_depenguin_uplink_name} ("untrusted" by default).
+#
+# Detection is based on the list of interfaces to look for and
+# if they are physically connected. In case an interface is
+# found and configured, the server is rebooted.
+#
+# (firstboot logic from firstboot-freebsd-update by cpercival)
 #
 # Add the following lines to /etc/rc.conf.local or /etc/rc.conf (in the disk
 # image, since this only runs on the first boot) to enable this:
@@ -130,15 +137,22 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #
 # Options:
 #
-# firstboot_depenguin_uplink_name: Set to "untrusted" by default
-# firstboot_depenguin_interfaces: Set to "em0 igb0 bge0" by default
+# firstboot_depenguin_uplink_name: Name of the uplink interface
+#                                  Set to "untrusted" by default
+# firstboot_depenguin_interfaces:  List of physical interfaces to check for
+#                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
+#                                  bge1 ixl0 ixl1" by default
+# firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
+#                                  Set to "10" by default
 #
 
 . /etc/rc.subr
 
 : ${firstboot_depenguin_enable:="NO"}
 : ${firstboot_depenguin_uplink_name:="untrusted"}
-: ${firstboot_depenguin_interfaces:="em0 igb0 bge0"}
+: ${firstboot_depenguin_interfaces:="vtnet0 \
+    em0 em1 igb0 igb1 bge0 bge1 ixl0 ixl1"}
+: ${firstboot_depenguin_sleep_secs:="10"}
 
 name="firstboot_depenguin"
 rcvar=firstboot_depenguin_enable
@@ -148,25 +162,29 @@ stop_cmd=":"
 firstboot_depenguin_run()
 {
 	local uplink="$firstboot_depenguin_uplink_name"
+	local sleep_secs="$firstboot_depenguin_sleep_secs"
 
 	intfs=$(ifconfig -l | tr " " "\n")
 	if echo "$intfs" | grep -q "^${uplink}$"; then
 		echo "Found existing interface named ${uplink}, doing nothing"
-	else
-		echo "No interface named ${uplink} found, trying to determine"
-		for i in $firstboot_depenguin_interfaces; do
-			intf=$(echo "$intfs" | grep -Eo "^${i}$" | head -n1)
-			[ -n "$intf" ] && break
-		done
-		if [ -z "$intf" ]; then
-			echo "No potential uplink interface found"
-		else
-			echo "Found interface ${intf}, configuring"
-			sysrc "ifconfig_${intf}_name=${uplink}"
-			echo "Requesting reboot after fixing network interface"
-			touch "${firstboot_sentinel}-reboot"
-		fi
+		return 0
 	fi
+	echo "No interface named ${uplink} found, trying to determine"
+	echo "Sleeping ${sleep_secs} seconds to allow things to settle"
+	sleep "${sleep_secs}"
+	for intf in $firstboot_depenguin_interfaces; do
+		echo "$intfs" | grep -Eq "^${intf}$" || continue
+		if ifconfig "$intf" | grep -q "status: no carrier"; then
+			echo "Interface ${intf} has no carrier"
+			continue
+		fi
+		echo "Found interface ${intf}, configuring"
+		sysrc "ifconfig_${intf}_name=${uplink}"
+		echo "Requesting reboot after fixing network interface"
+		touch "${firstboot_sentinel}-reboot"
+		return 0
+	done
+	echo "No potential uplink interface found"
 }
 
 load_rc_config $name
