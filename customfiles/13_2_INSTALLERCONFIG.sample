@@ -74,7 +74,7 @@ service sshd restart || true
 
 # removed as causing problems with user-run Ruby programs in jails
 # Change umask
-#sed -i '' -e 's/:umask=022:/:umask=027:/g' /etc/login.conf
+# sed -i '' -e 's/:umask=022:/:umask=027:/g' /etc/login.conf
 
 # Disable sendmail
 sysrc sendmail_enable=NONE
