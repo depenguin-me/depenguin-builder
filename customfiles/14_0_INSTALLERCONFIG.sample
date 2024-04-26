@@ -109,6 +109,16 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
 
+# Check for realtek network adapters
+# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
+if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec" | xargs)
+if [ "$if_re_count" -gt 0 ]; then
+	pkg install -y realtek-re-kmod198
+	sysrc -f /boot/loader.conf if_re_load="YES"
+	sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+	sysrc -f /boot/loader.conf hw.re.max_rx_mbuf_sz="2048"
+fi
+
 # Setup firstboot magic to determine network interface
 mkdir -p /usr/local/etc/rc.d
 
