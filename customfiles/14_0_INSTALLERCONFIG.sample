@@ -169,28 +169,17 @@ check_for_realtek()
 {
 	if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec")
 	if [ "$if_re_count" -gt 0 ]; then
-		echo "Checking for Realtek device"
-		if [ ! -f /root/pkg/realtek.installed ]; then
-			echo "Realtek device found, installing custom driver"
-		        pkg add /root/pkg/All/realtek-re-kmod198-198.00.pkg
-        		sysrc -f /boot/loader.conf if_re_load="YES"
-		        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
-			# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
-			echo 'hw.re.max_rx_mbuf_sz="2048"' >>/boot/loader.conf
-			touch /root/pkg/realtek.installed
-			touch /firstboot
-			sysrc firstboot_depenguin_enable=YES
-			shutdown -r now
-		else
-			echo "Realtek device found, driver already installed"
-		fi
+		echo "Realtek device found, installing custom driver"
+	        pkg add /root/pkg/All/realtek-re-kmod198-198.00.pkg
+       		sysrc -f /boot/loader.conf if_re_load="YES"
+	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+		# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
+		echo 'hw.re.max_rx_mbuf_sz="2048"' >>/boot/loader.conf
 	fi
 }
 
 firstboot_depenguin_run()
 {
-	check_for_realtek
-
 	local uplink="$firstboot_depenguin_uplink_name"
 	local sleep_secs="$firstboot_depenguin_sleep_secs"
 
@@ -209,6 +198,7 @@ firstboot_depenguin_run()
 			continue
 		fi
 		echo "Found interface ${intf}, configuring"
+		check_for_realtek
 		sysrc "ifconfig_${intf}_name=${uplink}"
 		echo "Requesting reboot after fixing network interface"
 		touch "${firstboot_sentinel}-reboot"
