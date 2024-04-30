@@ -109,15 +109,13 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
 
-# Check for realtek network adapters
-# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
-if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec" | xargs)
-if [ "$if_re_count" -gt 0 ]; then
-	pkg install -y realtek-re-kmod198
-	sysrc -f /boot/loader.conf if_re_load="YES"
-	sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
-	sysrc -f /boot/loader.conf hw.re.max_rx_mbuf_sz="2048"
-fi
+# download the package for realtek network adaptors
+# /var/cache/pkg/realtek-re-kmod198-198.00.pkg is symlink to actual file
+pkg fetch -y realtek-re-kmod198
+
+# maybe copy /var/cache/pkg/realtek-re-kmod198-198.00.pkg to /root/realtek-re-kmod198-198.00.pkg ?
+# cp /var/cache/pkg/realtek-re-kmod198-198.00.pkg /root/realtek-re-kmod198-198.00.pkg
+#
 
 # Setup firstboot magic to determine network interface
 mkdir -p /usr/local/etc/rc.d
@@ -152,7 +150,7 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #                                  Set to "untrusted" by default
 # firstboot_depenguin_interfaces:  List of physical interfaces to check for
 #                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
-#                                  bge1 ixl0 ixl1" by default
+#                                  bge1 ixl0 ixl1 re0 re1" by default
 # firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
 #                                  Set to "10" by default
 #
@@ -167,8 +165,19 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 
 name="firstboot_depenguin"
 rcvar=firstboot_depenguin_enable
-start_cmd="firstboot_depenguin_run | logger -s -t 'depenguin'"
+start_cmd="check_for_realtek | firstboot_depenguin_run | logger -s -t 'depenguin'"
 stop_cmd=":"
+
+check_for_realtek()
+{
+	if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec")
+	if [ "$if_re_count" -gt 0 ]; then
+	        pkg install -y /var/cache/pkg/realtek-re-kmod198-198.00.pkg
+        	sysrc -f /boot/loader.conf if_re_load="YES"
+	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+        	sysrc -f /boot/loader.conf hw.re.max_rx_mbuf_sz="2048"
+	fi
+}
 
 firstboot_depenguin_run()
 {
