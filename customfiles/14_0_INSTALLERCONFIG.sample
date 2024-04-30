@@ -170,7 +170,7 @@ check_for_realtek()
 	if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec")
 	if [ "$if_re_count" -gt 0 ]; then
 		echo "Realtek device found, installing custom driver"
-	        pkg add -y /root/pkg/All/realtek-re-kmod198-198.00.pkg
+	        pkg add /root/pkg/All/realtek-re-kmod198-198.00.pkg
         	sysrc -f /boot/loader.conf if_re_load="YES"
 	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
 		# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
