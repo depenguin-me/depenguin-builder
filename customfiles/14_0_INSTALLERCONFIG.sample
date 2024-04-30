@@ -175,6 +175,7 @@ check_for_realtek()
 	        pkg install -y /var/cache/pkg/realtek-re-kmod198-198.00.pkg
         	sysrc -f /boot/loader.conf if_re_load="YES"
 	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+		# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
         	sysrc -f /boot/loader.conf hw.re.max_rx_mbuf_sz="2048"
 	fi
 }
