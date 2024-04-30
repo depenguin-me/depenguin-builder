@@ -112,7 +112,7 @@ sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|
 # download the package for realtek network adaptors, save in /root/pkg
 # the file will be in subdir /root/pkg/All/
 mkdir -p /root/pkg
-/usr/sbin/pkg fetch -y -o /root/pkg realtek-re-kmod198
+/usr/sbin/pkg fetch -y -d -o /root/pkg realtek-re-kmod198
 
 # Setup firstboot magic to determine network interface
 mkdir -p /usr/local/etc/rc.d
@@ -170,7 +170,7 @@ check_for_realtek()
 	if_re_count=$(/usr/sbin/pciconf -l | grep "class=0x020000" | grep -c "vendor=0x10ec")
 	if [ "$if_re_count" -gt 0 ]; then
 		echo "Realtek device found, installing custom driver"
-	        pkg install -y /root/pkg/All/realtek-re-kmod198-198.00.pkg
+	        pkg add -y /root/pkg/All/realtek-re-kmod198-198.00.pkg
         	sysrc -f /boot/loader.conf if_re_load="YES"
 	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
 		# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
