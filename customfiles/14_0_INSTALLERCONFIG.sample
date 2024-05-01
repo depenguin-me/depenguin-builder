@@ -175,6 +175,13 @@ check_for_realtek()
 	        sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
 		# Note hw.re.max_rx_mbuf_sz="2048" removes support for jumbo frames
 		echo 'hw.re.max_rx_mbuf_sz="2048"' >>/boot/loader.conf
+                sysrc "ifconfig_re0_name=${uplink}"
+                echo "Requesting reboot after fixing network interface"
+                touch "${firstboot_sentinel}-reboot"
+		return 0
+	else
+		# if no interface and no realtek device, output error and no reboot
+		echo "No potential uplink interface found"
 	fi
 }
 
@@ -198,13 +205,15 @@ firstboot_depenguin_run()
 			continue
 		fi
 		echo "Found interface ${intf}, configuring"
-		check_for_realtek
 		sysrc "ifconfig_${intf}_name=${uplink}"
 		echo "Requesting reboot after fixing network interface"
 		touch "${firstboot_sentinel}-reboot"
 		return 0
 	done
-	echo "No potential uplink interface found"
+	echo "Checking for Realtek devices"
+	check_for_realtek
+
+	#moved# echo "No potential uplink interface found"
 }
 
 load_rc_config $name
