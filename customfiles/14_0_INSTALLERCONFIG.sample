@@ -109,6 +109,11 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
 
+# download the package for realtek network adaptors, save in /root/pkg
+# the file will be in subdir /root/pkg/All/
+mkdir -p /root/pkg
+/usr/sbin/pkg fetch -y -d -o /root/pkg realtek-re-kmod198
+
 # Setup firstboot magic to determine network interface
 mkdir -p /usr/local/etc/rc.d
 
@@ -142,7 +147,7 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #                                  Set to "untrusted" by default
 # firstboot_depenguin_interfaces:  List of physical interfaces to check for
 #                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
-#                                  bge1 ixl0 ixl1" by default
+#                                  bge1 ixl0 ixl1 re0 re1" by default
 # firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
 #                                  Set to "10" by default
 #
@@ -159,6 +164,40 @@ name="firstboot_depenguin"
 rcvar=firstboot_depenguin_enable
 start_cmd="firstboot_depenguin_run | logger -s -t 'depenguin'"
 stop_cmd=":"
+
+firstboot_depenguin_is_realtek_ifname()
+{
+	expr "X$1" : '^Xre[0-9]' >/dev/null
+}
+
+firstboot_depenguin_check_realtek_pci_id()
+{
+	local if_re_count
+
+	if_re_count=$(/usr/sbin/pciconf -l | \
+	    grep "class=0x020000" | grep -c "vendor=0x10ec")
+	[ "$if_re_count" -gt 0 ]
+}
+
+firstboot_depenguin_config()
+{
+	local intf=$1
+	local uplink=$2
+
+	sysrc "ifconfig_${intf}_name=${uplink}"
+	echo "Requesting reboot after fixing network interface"
+	touch "${firstboot_sentinel}-reboot"
+
+	if firstboot_depenguin_is_realtek_ifname "$intf" &&
+	    firstboot_depenguin_check_realtek_pci_id; then
+		echo "Realtek device found, installing custom driver"
+		pkg add /root/pkg/All/realtek-re-kmod198-198.00.pkg
+		sysrc -f /boot/loader.conf if_re_load="YES"
+		sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+		# Note: The line below disables jumbo frame support
+		echo 'hw.re.max_rx_mbuf_sz="2048"' >>/boot/loader.conf
+	fi
+}
 
 firstboot_depenguin_run()
 {
@@ -180,11 +219,19 @@ firstboot_depenguin_run()
 			continue
 		fi
 		echo "Found interface ${intf}, configuring"
-		sysrc "ifconfig_${intf}_name=${uplink}"
-		echo "Requesting reboot after fixing network interface"
-		touch "${firstboot_sentinel}-reboot"
+		firstboot_depenguin_config "${intf}" "$uplink"
 		return 0
 	done
+	# check if we should gamble for a realtek interface
+	if firstboot_depenguin_check_realtek_pci_id; then
+		for intf in $firstboot_depenguin_interfaces; do
+			firstboot_depenguin_is_realtek_ifname "$intf" \
+			    || continue
+			echo "Configuring potential interface ${intf}"
+			firstboot_depenguin_config "${intf}" "$uplink"
+			return 0
+		done
+	fi
 	echo "No potential uplink interface found"
 }
 
