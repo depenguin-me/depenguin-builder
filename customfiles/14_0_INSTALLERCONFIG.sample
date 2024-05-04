@@ -174,7 +174,7 @@ firstboot_depenguin_check_realtek_pci_id()
 {
 	local if_re_count
 
-	if_re_count==$(/usr/sbin/pciconf -l | \
+	if_re_count=$(/usr/sbin/pciconf -l | \
 	    grep "class=0x020000" | grep -c "vendor=0x10ec")
 	[ "$if_re_count" -gt 0 ]
 }
