@@ -167,14 +167,16 @@ stop_cmd=":"
 
 firstboot_depenguin_is_realtek_ifname()
 {
-	expr "X$1" : '^Xre[0-9]' >/dev/null || return 1
+	expr "X$1" : '^Xre[0-9]' >/dev/null
 }
 
 firstboot_depenguin_check_realtek_pci_id()
 {
-	local if_re_count=$(/usr/sbin/pciconf -l | \
+	local if_re_count
+
+	if_re_count==$(/usr/sbin/pciconf -l | \
 	    grep "class=0x020000" | grep -c "vendor=0x10ec")
-	[ "$if_re_count" -eq 0 ] && return 1
+	[ "$if_re_count" -gt 0 ]
 }
 
 firstboot_depenguin_config()
