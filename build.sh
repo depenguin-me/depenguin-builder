@@ -14,6 +14,7 @@
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
 # 2023-12-13: configure for multiple releases
+# 2024-06-07: add FreeBSD-14.1 release option
 #
 
 # this script must be run as root
@@ -45,7 +46,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2 or 14.0)
+	version (valid values are 13.2, 14.0 or 14.1)
 	EOF
 }
 
@@ -79,7 +80,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2 or 14.0 currently
+# arg1 needs to be 13.2, 14.0 or 14.1 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -100,8 +101,16 @@ case $RELEASE in
 		MYRELEASE="14.0-RELEASE"
 		MYVERSION="14.0"
 		;;
+	14.1)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.1/FreeBSD-14.1-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.1R/checksums/CHECKSUM.SHA256-FreeBSD-14.1-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="5321791bd502c3714850e79743f5a1aedfeb26f37eeed7cb8eb3616d0aebf86b"
+		FREEBSDISOFILE="FreeBSD-14.1-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.1-RELEASE"
+		MYVERSION="14.1"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2 or 14.0."
+		echo "Invalid version specified. Use 13.2, 14.0 or 14.1."
 		exit_error "$(usage)"
 		;;
 esac
@@ -209,8 +218,8 @@ VERSION_PREFIX="${MYVERSION//\./_}"
 
 # setup correct files to copy in based on version
 #
-#  When updating for new version, copy 14_0_depenguin_bsdinstall.sh
-#  to 14_1_depenguin_bsdinstall.sh and edit, and same for 14_0_INSTALLERCONFIG.sample
+#  When updating for new version, copy 14_1_depenguin_bsdinstall.sh
+#  to 14_2_depenguin_bsdinstall.sh and edit, and same for 14_1_INSTALLERCONFIG.sample
 #
 if [ -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" ]; then
 	cp -f "$MYCUSTOMDIR/${VERSION_PREFIX}_depenguin_bsdinstall.sh" "$MYCUSTOMDIR/depenguin_bsdinstall.sh"
