@@ -147,7 +147,8 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 #                                  Set to "untrusted" by default
 # firstboot_depenguin_interfaces:  List of physical interfaces to check for
 #                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
-#                                  bge1 ixl0 ixl1 re0 re1" by default
+#                                  bge1 ixl0 ixl1 re0 re1 bnxt0 bnxt1
+#                                  bxe0 bxe1 igc0 igc1" by default
 # firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
 #                                  Set to "10" by default
 #
