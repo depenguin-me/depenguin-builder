@@ -14,7 +14,7 @@
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
 # 2023-12-13: configure for multiple releases
-# 2024-07-12: Add 13.3 release, check for python39/python311 replacements in 14.0 but not seeing anything
+# 2024-07-12: Add 13.3 release, enable igc0 and igc1 
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
