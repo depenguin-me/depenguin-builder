@@ -14,7 +14,7 @@
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
 # 2023-12-13: configure for multiple releases
-#
+# 2024-07-12: Add 13.3 release, check for python39/python311 replacements in 14.0 but not seeing anything
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -45,7 +45,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2 or 14.0)
+	version (valid values are 13.2, 13.3 or 14.0)
 	EOF
 }
 
@@ -79,7 +79,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2 or 14.0 currently
+# arg1 needs to be 13.2, 13.3 or 14.0 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -92,6 +92,14 @@ case $RELEASE in
 		MYRELEASE="13.2-RELEASE"
 		MYVERSION="13.2"
 		;;
+	13.3)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.3/FreeBSD-13.3-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/13.3R/checksums/CHECKSUM.SHA256-FreeBSD-13.3-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="94b91af989767c974b36e10ad5c45bd6aa4aa71d9da825ceffa904bc02c4ff9c"
+		FREEBSDISOFILE="FreeBSD-13.3-RELEASE-amd64-disc1.iso"
+		MYRELEASE="13.3-RELEASE"
+		MYVERSION="13.3"
+		;;
 	14.0)
 		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
 		# See https://www.freebsd.org/releases/14.0R/checksums/CHECKSUM.SHA256-FreeBSD-14.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
@@ -101,7 +109,7 @@ case $RELEASE in
 		MYVERSION="14.0"
 		;;
 	*)
-		echo "Invalid version specified. Use 13.2 or 14.0."
+		echo "Invalid version specified. Use 13.2, 13.3 or 14.0."
 		exit_error "$(usage)"
 		;;
 esac
