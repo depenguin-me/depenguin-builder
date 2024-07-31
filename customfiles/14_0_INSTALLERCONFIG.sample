@@ -214,6 +214,7 @@ firstboot_depenguin_run()
 	sleep "${sleep_secs}"
 	for intf in $firstboot_depenguin_interfaces; do
 		echo "$intfs" | grep -Eq "^${intf}$" || continue
+                ifconfig "$intf" up
 		if ifconfig "$intf" | grep -q "status: no carrier"; then
 			echo "Interface ${intf} has no carrier"
 			continue
