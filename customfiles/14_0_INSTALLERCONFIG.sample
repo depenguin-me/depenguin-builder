@@ -216,7 +216,6 @@ firstboot_depenguin_run()
 		echo "$intfs" | grep -Eq "^${intf}$" || continue
         	if echo "$intf" | grep -Eq "ix"; then
 			ifconfig $intf up
-                ifconfig "$intf" up
 		if ifconfig "$intf" | grep -q "status: no carrier"; then
 			echo "Interface ${intf} has no carrier"
 			continue
