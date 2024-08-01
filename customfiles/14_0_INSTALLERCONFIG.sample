@@ -157,7 +157,8 @@ cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
 : ${firstboot_depenguin_enable:="NO"}
 : ${firstboot_depenguin_uplink_name:="untrusted"}
 : ${firstboot_depenguin_interfaces:="vtnet0 \
-    em0 em1 igb0 igb1 bge0 bge1 ixl0 ixl1 re0 re1 bnxt0 bnxt1 bxe0 bxe1"}
+    em0 em1 igb0 igb1 ix0 ix1 ix2 ix3 bge0 bge1 ixl0 ixl1 re0 re1 \
+    bnxt0 bnxt1 bxe0 bxe1"}
 : ${firstboot_depenguin_sleep_secs:="10"}
 
 name="firstboot_depenguin"
@@ -214,6 +215,7 @@ firstboot_depenguin_run()
 	sleep "${sleep_secs}"
 	for intf in $firstboot_depenguin_interfaces; do
 		echo "$intfs" | grep -Eq "^${intf}$" || continue
+        	echo "$intf" | grep -Eq "^ix[0-9]$" && ifconfig "$intf" up
 		if ifconfig "$intf" | grep -q "status: no carrier"; then
 			echo "Interface ${intf} has no carrier"
 			continue
