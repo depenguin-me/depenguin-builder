@@ -14,6 +14,7 @@
 # 2023-05-27: update to FreeBSD-13.2 release
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
 # 2023-12-13: configure for multiple releases
+# 2024-09-25: Add support for 13.4 and 14.1 releases
 #
 
 # this script must be run as root
@@ -45,7 +46,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2 or 14.0)
+	version (valid values are 13.2, 13.4, 14.0, 14.1)
 	EOF
 }
 
@@ -79,7 +80,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2 or 14.0 currently
+# arg1 needs to be 13.2, 13.4, 14.0, 14.1 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -92,6 +93,14 @@ case $RELEASE in
 		MYRELEASE="13.2-RELEASE"
 		MYVERSION="13.2"
 		;;
+	13.4)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.4/FreeBSD-13.4-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/13.4R/checksums/CHECKSUM.SHA256-FreeBSD-13.4-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="536b2b7ba3e32ccf222886dced4bce12c7888a402b8400832398f6402dc464c2"
+		FREEBSDISOFILE="FreeBSD-13.4-RELEASE-amd64-disc1.iso"
+		MYRELEASE="13.4-RELEASE"
+		MYVERSION="13.4"
+		;;
 	14.0)
 		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
 		# See https://www.freebsd.org/releases/14.0R/checksums/CHECKSUM.SHA256-FreeBSD-14.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
@@ -100,8 +109,16 @@ case $RELEASE in
 		MYRELEASE="14.0-RELEASE"
 		MYVERSION="14.0"
 		;;
+	14.1)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.1/FreeBSD-14.1-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.1R/checksums/CHECKSUM.SHA256-FreeBSD-14.1-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="5321791bd502c3714850e79743f5a1aedfeb26f37eeed7cb8eb3616d0aebf86b"
+		FREEBSDISOFILE="FreeBSD-14.1-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.1-RELEASE"
+		MYVERSION="14.1"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2 or 14.0."
+		echo "Invalid version specified. Use 13.2, 13.4, 14.0 or 14.1."
 		exit_error "$(usage)"
 		;;
 esac
