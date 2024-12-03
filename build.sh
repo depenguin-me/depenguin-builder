@@ -121,7 +121,7 @@ case $RELEASE in
 	14.2)
 		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso.xz"
 		# See https://www.freebsd.org/releases/14.2R/checksums/CHECKSUM.SHA256-FreeBSD-14.2-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
-		# howeve the checksum doesn't match for this release, a manually derived checksum on downloaded ISO file is set.
+		# however the checksum doesn't match for this release, a manually derived checksum on downloaded ISO file is set.
 		FREEBSDISOSHA256="8426a8e00193bcf4b994e1ec0291d71f26896dc2388b113f176baf29acff217d"
 		FREEBSDISOFILE="FreeBSD-14.2-RELEASE-amd64-disc1.iso"
 		MYRELEASE="14.2-RELEASE"
