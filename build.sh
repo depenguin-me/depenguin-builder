@@ -15,6 +15,7 @@
 #             add image size as configurable parameter for MFSROOT_MAXSIZE
 # 2023-12-13: configure for multiple releases
 # 2024-09-25: Add support for 13.4 and 14.1 releases
+# 2024-12-03: Add support for 14.2 release
 #
 
 # this script must be run as root
@@ -80,7 +81,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2, 13.4, 14.0, 14.1 currently
+# arg1 needs to be 13.2, 13.4, 14.0, 14.1, 14.2 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -117,8 +118,16 @@ case $RELEASE in
 		MYRELEASE="14.1-RELEASE"
 		MYVERSION="14.1"
 		;;
+	14.2)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.2/FreeBSD-14.2-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.2R/checksums/CHECKSUM.SHA256-FreeBSD-14.2-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="a3c771e2fa958e922a5771047d524d7df3ce501e58bed5c65f0226e4d31ebd30"
+		FREEBSDISOFILE="FreeBSD-14.2-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.2-RELEASE"
+		MYVERSION="14.2"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2, 13.4, 14.0 or 14.1."
+		echo "Invalid version specified. Use 13.2, 13.4, 14.0, 14.1 or 14.2."
 		exit_error "$(usage)"
 		;;
 esac
