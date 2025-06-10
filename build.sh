@@ -157,7 +157,7 @@ MFSBSDDIR="mfsbsd"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
-OUTIMAGESIZE="200m"
+OUTIMAGESIZE="300m"
 MYBASE="$BASEDIR/$CDMOUNT/usr/freebsd-dist"
 MYCUSTOMDIR="$BASEDIR/customfiles"
 
