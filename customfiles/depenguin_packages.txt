@@ -6,7 +6,6 @@ dhcpcd
 dmidecode
 ipmitool
 jq
-jo
 joe
 mtr-nox11
 nano
