@@ -16,6 +16,7 @@
 # 2023-12-13: configure for multiple releases
 # 2024-09-25: Add support for 13.4 and 14.1 releases
 # 2024-12-03: Add support for 14.2 release
+# 2025-06-10: Add support for 13.5 and 14.3 releases
 #
 
 # this script must be run as root
@@ -47,7 +48,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2, 13.4, 14.0, 14.1)
+	version (valid values are 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, or 14.3)
 	EOF
 }
 
@@ -81,7 +82,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2, 13.4, 14.0, 14.1, 14.2 currently
+# arg1 needs to be 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -101,6 +102,14 @@ case $RELEASE in
 		FREEBSDISOFILE="FreeBSD-13.4-RELEASE-amd64-disc1.iso"
 		MYRELEASE="13.4-RELEASE"
 		MYVERSION="13.4"
+		;;
+	13.5)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/13.5/FreeBSD-13.5-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/13.5R/checksums/CHECKSUM.SHA256-FreeBSD-13.5-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="12ada1eb745df5b4f42a1afde4f0d2f333d389c8a7f07244e562b922443c2de7"
+		FREEBSDISOFILE="FreeBSD-13.5-RELEASE-amd64-disc1.iso"
+		MYRELEASE="13.5-RELEASE"
+		MYVERSION="13.5"
 		;;
 	14.0)
 		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.0/FreeBSD-14.0-RELEASE-amd64-disc1.iso.xz"
@@ -126,8 +135,16 @@ case $RELEASE in
 		MYRELEASE="14.2-RELEASE"
 		MYVERSION="14.2"
 		;;
+	14.3)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/14.3/FreeBSD-14.3-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/14.3R/checksums/CHECKSUM.SHA256-FreeBSD-14.3-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="f564822bc72d420d1e1a6faacb72f6056d828fcf539dfafd52e08503ef5fab68"
+		FREEBSDISOFILE="FreeBSD-14.3-RELEASE-amd64-disc1.iso"
+		MYRELEASE="14.3-RELEASE"
+		MYVERSION="14.3"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2, 13.4, 14.0, 14.1 or 14.2."
+		echo "Invalid version specified. Use 13.2, 13.4, 13.5, 14.0, 14.1, 14.2 or 14.3."
 		exit_error "$(usage)"
 		;;
 esac
@@ -140,7 +157,7 @@ MFSBSDDIR="mfsbsd"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
-OUTIMAGESIZE="200m"
+OUTIMAGESIZE="300m"
 MYBASE="$BASEDIR/$CDMOUNT/usr/freebsd-dist"
 MYCUSTOMDIR="$BASEDIR/customfiles"
 
