@@ -17,7 +17,7 @@
 # 2024-09-25: Add support for 13.4 and 14.1 releases
 # 2024-12-03: Add support for 14.2 release
 # 2025-06-10: Add support for 13.5 and 14.3 releases
-#
+# 2025-10-16: Fix issue with realtek network drivers on 14.3
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
