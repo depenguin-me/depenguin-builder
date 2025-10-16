@@ -192,7 +192,7 @@ firstboot_depenguin_config()
 	if firstboot_depenguin_is_realtek_ifname "$intf" &&
 	    firstboot_depenguin_check_realtek_pci_id; then
 		echo "Realtek device found, installing custom driver"
-		pkg add /root/pkg/All/realtek-re-kmod198-198.00.pkg
+		pkg add /root/pkg/All/realtek-re-kmod198-198.00*.pkg
 		sysrc -f /boot/loader.conf if_re_load="YES"
 		sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
 		# Note: The line below disables jumbo frame support
