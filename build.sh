@@ -18,6 +18,7 @@
 # 2024-12-03: Add support for 14.2 release
 # 2025-06-10: Add support for 13.5 and 14.3 releases
 # 2025-10-16: Fix issue with realtek network drivers on 14.3
+# 2025-12-03: Add options for AX102 server tweaks in customfiles dir
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
