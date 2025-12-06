@@ -26,6 +26,15 @@ fi
 # safe(r) separator for sed
 sep=$'\001'
 
+# enable/disable AX102 specific options
+if [ "$tweak_ax102" -ne 0 ]; then
+	# Enable ax102 tweak steps in INSTALLERCONFIG.sample
+	sed -i '' "s${sep}%%tweak_ax102%%${sep}${sep}g" INSTALLERCONFIG.sample
+else
+	# comment out ax102 tweak steps from INSTALLERCONFIG.sample
+	sed -i '' "s${sep}%%tweak_ax102%%${sep}#${sep}g" INSTALLERCONFIG.sample
+fi
+
 # change variables in INSTALLERCONFIG to our settings and save to INSTALLERCONFIG.active
 < INSTALLERCONFIG.sample \
   sed "s${sep}%%hostname%%${sep}$conf_hostname${sep}g" | \

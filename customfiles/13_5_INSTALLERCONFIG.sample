@@ -109,6 +109,12 @@ sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|
 sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
     /etc/newsyslog.conf
 
+# Hetzner ax102 tweaks, only enabled if depenguin_settings.sh parameter tweak_ax102
+# is set to non-zero, else commented out in final file
+%%tweak_ax102%%echo "dev.cpu.0.freq=3000" >>/etc/sysctl.conf
+%%tweak_ax102%%sysrc -f /boot/loader.conf console=comconsole
+%%tweak_ax102%%sysrc -f /boot/loader.conf amdtemp_load=YES
+
 # download the package for realtek network adaptors, save in /root/pkg
 # the file will be in subdir /root/pkg/All/
 mkdir -p /root/pkg
