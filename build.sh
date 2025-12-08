@@ -19,6 +19,7 @@
 # 2025-06-10: Add support for 13.5 and 14.3 releases
 # 2025-10-16: Fix issue with realtek network drivers on 14.3
 # 2025-12-03: Add options for AX102 server tweaks in customfiles dir
+# 2025-12-08: Add support for 15.0 release
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -49,7 +50,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, or 14.3)
+	version (valid values are 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, or 15.0)
 	EOF
 }
 
@@ -83,7 +84,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3 currently
+# arg1 needs to be 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 15.0 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -144,8 +145,16 @@ case $RELEASE in
 		MYRELEASE="14.3-RELEASE"
 		MYVERSION="14.3"
 		;;
+	15.0)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/15.0/FreeBSD-15.0-RELEASE-amd64-disc1.iso.xz"
+		# See https://www.freebsd.org/releases/15.0R/checksums/CHECKSUM.SHA256-FreeBSD-15.0-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="cc73a14d4b1cfada880b78deb0b94ae0f439167418c32a6708f68f79563cb50c"
+		FREEBSDISOFILE="FreeBSD-15.0-RELEASE-amd64-disc1.iso"
+		MYRELEASE="15.0-RELEASE"
+		MYVERSION="15.0"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2, 13.4, 13.5, 14.0, 14.1, 14.2 or 14.3."
+		echo "Invalid version specified. Use 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, or 15.0."
 		exit_error "$(usage)"
 		;;
 esac

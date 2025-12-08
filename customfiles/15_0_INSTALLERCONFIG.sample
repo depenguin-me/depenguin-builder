@@ -1,0 +1,254 @@
+DISTRIBUTIONS="kernel.txz base.txz"
+BSDINSTALL_DISTSITE="https://download.freebsd.org/ftp/releases/amd64/15.0-RELEASE/"
+BSDINSTALL_DISTDIR="/tmp"
+INTERFACES="%%interface%%"
+RELEASE="15.0"
+GEOM="%%disks%%"
+export GEOM
+GEOMTYPE="%%disktype%%"
+export GEOMTYPE
+export ZFSBOOT_DISKS="$GEOM"
+export ZFSBOOT_VDEV_TYPE="$GEOMTYPE"
+export ZFSBOOT_FORCE_4K_SECTORS="1"
+export ZFSBOOT_SWAP_SIZE="8g"
+export ZFSBOOT_SWAP_MIRROR="1"
+export ZFSBOOT_POOL_CREATE_OPTIONS="-O compress=lz4 -O checksum=fletcher4"
+export nonInteractive="YES"
+
+#!/bin/sh
+ASSUME_ALWAYS_YES=yes FETCH_RETRY=5 pkg install ca_root_nss
+ASSUME_ALWAYS_YES=yes FETCH_RETRY=5 pkg install curl
+ASSUME_ALWAYS_YES=yes FETCH_RETRY=5 pkg install sudo
+ASSUME_ALWAYS_YES=yes FETCH_RETRY=5 pkg install bash
+
+# Disable X11
+echo 'OPTIONS_UNSET+=X11' >> /etc/make.conf
+
+# Basic network options
+sysrc hostname=%%hostname%%
+#sysrc ifconfig_%%interface%%_name="untrusted"
+sysrc ifconfig_untrusted="up"
+sysrc ifconfig_untrusted_ipv6="up"
+sysrc ifconfig_untrusted_aliases="inet %%ipv4%%/32 inet6 %%ipv6%%/64"
+sysrc ipv6_activate_all_interfaces="YES"
+sysrc static_routes="gateway default"
+sysrc route_gateway="-host %%gateway%% -interface untrusted"
+sysrc route_default="default %%gateway%%"
+sysrc ipv6_defaultrouter="fe80::1%untrusted"
+
+cat > /etc/resolv.conf<<EOR
+nameserver %%nameserveripv4one%%
+nameserver %%nameserveripv4two%%
+nameserver %%nameserveripv6one%%
+nameserver %%nameserveripv6two%%
+EOR
+
+# enable zfs
+sysrc zfs_enable=YES
+
+# Enable sshd by default
+sysrc sshd_enable=YES
+
+# Configure SSH server
+sed -i '' -e 's/^#UseDNS yes/UseDNS no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#Compression delayed/Compression no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^PasswordAuthentication yes/PasswordAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#ChallengeResponseAuthentication yes/ChallengeResponseAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#KbdInteractiveAuthentication yes/KbdInteractiveAuthentication no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#UsePAM yes/UsePAM no/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#VersionAddendum .*$/VersionAddendum none/' \
+    /etc/ssh/sshd_config
+sed -i '' -e 's/^#X11Forwarding yes/X11Forwarding no/' \
+    /etc/ssh/sshd_config
+
+# restart ssh
+rm -r /etc/ssh/ssh_host_* || true
+/usr/bin/ssh-keygen -A
+service sshd restart || true
+
+# removed as causing problems with user-run Ruby programs in jails
+# Change umask
+# sed -i '' -e 's/:umask=022:/:umask=027:/g' /etc/login.conf
+
+# Disable sendmail
+sysrc sendmail_enable=NONE
+
+# create default user
+pw groupadd %%username%%
+pw useradd -m -n %%username%% -g %%username%% -G wheel -h - -c "default user"
+
+# add pubkey to default user
+mkdir -p /home/%%username%%/.ssh
+fetch %%pubkeyurl%% -o /home/%%username%%/.ssh/authorized_keys
+chown -R %%username%%:%%username%% /home/%%username%%/.ssh
+chmod 600 /home/%%username%%/.ssh/authorized_keys
+chmod 700 /home/%%username%%/.ssh
+
+# update sudo access
+cat > /usr/local/etc/sudoers.d/wheel<<EOF
+%wheel ALL=(ALL) NOPASSWD: ALL
+EOF
+
+# Remove root password
+/usr/sbin/pw usermod root -h -
+
+# Secure ttys
+sed -i '' -e 's/ secure/ insecure/g' /etc/ttys
+
+# Secure newsyslog
+sed -i '' -e 's|^/var/log/init.log          644|/var/log/init.log           640|' \
+    /etc/newsyslog.conf
+sed -i '' -e 's|^/var/log/messages          644|/var/log/messages           640|' \
+    /etc/newsyslog.conf
+sed -i '' -e 's|^/var/log/devd.log          644|/var/log/devd.log           640|' \
+    /etc/newsyslog.conf
+
+# Hetzner ax102 tweaks, only enabled if depenguin_settings.sh parameter tweak_ax102
+# is set to non-zero, else commented out in final file
+%%tweak_ax102%%echo "dev.cpu.0.freq=3000" >>/etc/sysctl.conf
+%%tweak_ax102%%sysrc -f /boot/loader.conf console=comconsole
+%%tweak_ax102%%sysrc -f /boot/loader.conf amdtemp_load=YES
+
+# download the package for realtek network adaptors, save in /root/pkg
+# the file will be in subdir /root/pkg/All/
+mkdir -p /root/pkg
+/usr/sbin/pkg fetch -y -d -o /root/pkg realtek-re-kmod198
+
+# Setup firstboot magic to determine network interface
+mkdir -p /usr/local/etc/rc.d
+
+# See https://reviews.freebsd.org/D43350 why we use echo here
+echo '#!/bin/sh' >/usr/local/etc/rc.d/firstboot_depenguin
+cat >>/usr/local/etc/rc.d/firstboot_depenguin<<"EOF"
+
+# KEYWORD: firstboot
+# PROVIDE: firstboot_depenguin
+# REQUIRE: syslogd NETWORKING
+# BEFORE: LOGIN
+
+#
+# Script to detect the physical uplink interface and rename
+# it to ${firstboot_depenguin_uplink_name} ("untrusted" by default).
+#
+# Detection is based on the list of interfaces to look for and
+# if they are physically connected. In case an interface is
+# found and configured, the server is rebooted.
+#
+# (firstboot logic from firstboot-freebsd-update by cpercival)
+#
+# Add the following lines to /etc/rc.conf.local or /etc/rc.conf (in the disk
+# image, since this only runs on the first boot) to enable this:
+#
+# firstboot_depenguin_enable="YES"
+#
+# Options:
+#
+# firstboot_depenguin_uplink_name: Name of the uplink interface
+#                                  Set to "untrusted" by default
+# firstboot_depenguin_interfaces:  List of physical interfaces to check for
+#                                  Set to "vtnet0 em0 em1 igb0 igb1 bge0
+#                                  bge1 ixl0 ixl1 re0 re1" by default
+# firstboot_depenguin_sleep_secs:  Seconds to sleep before probing
+#                                  Set to "10" by default
+#
+
+. /etc/rc.subr
+
+: ${firstboot_depenguin_enable:="NO"}
+: ${firstboot_depenguin_uplink_name:="untrusted"}
+: ${firstboot_depenguin_interfaces:="vtnet0 \
+    em0 em1 igb0 igb1 ix0 ix1 ix2 ix3 bge0 bge1 ixl0 ixl1 re0 re1 \
+    bnxt0 bnxt1 bxe0 bxe1"}
+: ${firstboot_depenguin_sleep_secs:="10"}
+
+name="firstboot_depenguin"
+rcvar=firstboot_depenguin_enable
+start_cmd="firstboot_depenguin_run | logger -s -t 'depenguin'"
+stop_cmd=":"
+
+firstboot_depenguin_is_realtek_ifname()
+{
+	expr "X$1" : '^Xre[0-9]' >/dev/null
+}
+
+firstboot_depenguin_check_realtek_pci_id()
+{
+	local if_re_count
+
+	if_re_count=$(/usr/sbin/pciconf -l | \
+	    grep "class=0x020000" | grep -c "vendor=0x10ec")
+	[ "$if_re_count" -gt 0 ]
+}
+
+firstboot_depenguin_config()
+{
+	local intf=$1
+	local uplink=$2
+
+	sysrc "ifconfig_${intf}_name=${uplink}"
+	echo "Requesting reboot after fixing network interface"
+	touch "${firstboot_sentinel}-reboot"
+
+	if firstboot_depenguin_is_realtek_ifname "$intf" &&
+	    firstboot_depenguin_check_realtek_pci_id; then
+		echo "Realtek device found, installing custom driver"
+		pkg add /root/pkg/All/realtek-re-kmod198-198.00*.pkg
+		sysrc -f /boot/loader.conf if_re_load="YES"
+		sysrc -f /boot/loader.conf if_re_name="/boot/modules/if_re.ko"
+		# Note: The line below disables jumbo frame support
+		echo 'hw.re.max_rx_mbuf_sz="2048"' >>/boot/loader.conf
+	fi
+}
+
+firstboot_depenguin_run()
+{
+	local uplink="$firstboot_depenguin_uplink_name"
+	local sleep_secs="$firstboot_depenguin_sleep_secs"
+
+	intfs=$(ifconfig -l | tr " " "\n")
+	if echo "$intfs" | grep -q "^${uplink}$"; then
+		echo "Found existing interface named ${uplink}, doing nothing"
+		return 0
+	fi
+	echo "No interface named ${uplink} found, trying to determine"
+	echo "Sleeping ${sleep_secs} seconds to allow things to settle"
+	sleep "${sleep_secs}"
+	for intf in $firstboot_depenguin_interfaces; do
+		echo "$intfs" | grep -Eq "^${intf}$" || continue
+        	echo "$intf" | grep -Eq "^ix[0-9]$" && ifconfig "$intf" up
+		if ifconfig "$intf" | grep -q "status: no carrier"; then
+			echo "Interface ${intf} has no carrier"
+			continue
+		fi
+		echo "Found interface ${intf}, configuring"
+		firstboot_depenguin_config "${intf}" "$uplink"
+		return 0
+	done
+	# check if we should gamble for a realtek interface
+	if firstboot_depenguin_check_realtek_pci_id; then
+		for intf in $firstboot_depenguin_interfaces; do
+			firstboot_depenguin_is_realtek_ifname "$intf" \
+			    || continue
+			echo "Configuring potential interface ${intf}"
+			firstboot_depenguin_config "${intf}" "$uplink"
+			return 0
+		done
+	fi
+	echo "No potential uplink interface found"
+}
+
+load_rc_config $name
+run_rc_command "$1"
+EOF
+chmod 755 /usr/local/etc/rc.d/firstboot_depenguin
+sysrc firstboot_depenguin_enable=YES
+touch /firstboot
+
+# Reboot
+shutdown -p now
