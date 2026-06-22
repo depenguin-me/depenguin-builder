@@ -21,6 +21,7 @@
 # 2025-12-03: Add options for AX102 server tweaks in customfiles dir
 # 2025-12-08: Add support for 15.0 release, uses the DVD install media not CD, reduce disk space check to 5 GB
 # 2026-03-22: Add support for 14.4 release
+# 2026-06-22: Add support for 15.1 release, uses the DVD install media not CD
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -51,7 +52,7 @@ usage() {
 	-k /path/to/authorized_keys (can safely ignore, another opportunity to copy
 	   in SSH keys on image boot!)
 
-	version (valid values are 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4, or 15.0)
+	version (valid values are 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4, 15.0, or 15.1)
 	EOF
 }
 
@@ -85,7 +86,7 @@ do
 done
 shift "$((OPTIND-1))"
 
-# arg1 needs to be 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4, 15.0 currently
+# arg1 needs to be 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4, 15.0, or 15.1 currently
 RELEASE="$1"
 
 # Determine the release to use and set specific variables, or provide an error notice
@@ -162,8 +163,16 @@ case $RELEASE in
 		MYRELEASE="15.0-RELEASE"
 		MYVERSION="15.0"
 		;;
+	15.1)
+		FREEBSDISOSRC="https://download.freebsd.org/releases/amd64/amd64/ISO-IMAGES/15.1/FreeBSD-15.1-RELEASE-amd64-dvd1.iso"
+		# See https://www.freebsd.org/releases/15.1R/checksums/CHECKSUM.SHA256-FreeBSD-15.1-RELEASE-amd64.asc for SHA256 of ISO file, not iso.xz
+		FREEBSDISOSHA256="027504262c65e096d78bd345d74905a8a7216bbb3c6155d55634ae8328f76c5d"
+		FREEBSDISOFILE="FreeBSD-15.1-RELEASE-amd64-dvd1.iso"
+		MYRELEASE="15.1-RELEASE"
+		MYVERSION="15.1"
+		;;
 	*)
-		echo "Invalid version specified. Use 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4 or 15.0."
+		echo "Invalid version specified. Use 13.2, 13.4, 13.5, 14.0, 14.1, 14.2, 14.3, 14.4, 15.0, or 15.1."
 		exit_error "$(usage)"
 		;;
 esac
