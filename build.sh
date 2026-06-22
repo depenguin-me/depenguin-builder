@@ -21,7 +21,7 @@
 # 2025-12-03: Add options for AX102 server tweaks in customfiles dir
 # 2025-12-08: Add support for 15.0 release, uses the DVD install media not CD, reduce disk space check to 5 GB
 # 2026-03-22: Add support for 14.4 release
-# 2026-06-22: Add support for 15.1 release, uses the DVD install media not CD
+# 2026-06-22: Add support for 15.1 release, uses the DVD install media not CD, increase MFSROOT_MAXSIZE
 
 # this script must be run as root
 if [ "$EUID" -ne 0 ]; then
@@ -185,7 +185,7 @@ MFSBSDDIR="mfsbsd"
 MYARCH="amd64"
 OUTIMG="mfsbsd-$MYRELEASE-$MYARCH.img"    # not in use
 OUTISO="mfsbsd-$MYRELEASE-$MYARCH.iso"    # in use
-OUTIMAGESIZE="300m"
+OUTIMAGESIZE="380m"
 MYBASE="$BASEDIR/$CDMOUNT/usr/freebsd-dist"
 MYCUSTOMDIR="$BASEDIR/customfiles"
 
